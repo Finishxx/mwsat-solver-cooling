@@ -1,0 +1,8 @@
+BasedOnStyle: Google
+DerivePointerAlignment: false
+PointerAlignment: Left
+AllowAllArgumentsOnNextLine: false
+BinPackArguments: false
+PenaltyBreakBeforeFirstCallParameter: 20000
+AlignAfterOpenBracket: BlockIndent
+AlignTrailingComments: false
