@@ -1,5 +1,5 @@
-//
-// Created by tomjedno on 24/11/24.
-//
-
 #include "dimacsParser.h"
+
+// Inspiration here:
+// https://courses.fit.cvut.cz/NI-KOP/tutorials/files/sat-brute-force.html
+SatInput parseDimacsFile(std::istream input) {}
