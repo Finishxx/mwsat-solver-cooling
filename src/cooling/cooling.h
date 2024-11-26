@@ -1,4 +1,5 @@
 #pragma once
+#include <cooling.h>
 #include <sat.h>
 
 /**
@@ -34,11 +35,22 @@ class Problem {
 };
 
 template <typename T>
-concept Criteriable = requires(T t) {
-  { t == t } -> std::same_as<bool>;
+concept Criteriable = std::totally_ordered<T> && requires(T t1, T t2) {
+  { t1.howMuchWorseThan(t2) } -> std::convertible_to<double>;
+  { t1.howMuchBetterThan(t2) } -> std::convertible_to<double>;
 };
 
-template <typename Problem, typename Configuration, typename Criteria>
+template <typename T, typename Configuration, Criteriable Criteria>
+concept Problemable<Configuration, Criteria> =
+    requires(T t, Configuration config) {
+      { t.getRandomNeighbor() } -> std::convertible_to<Configuration>;
+      { t.evaluateConfiguration(config) } -> std::convertible_to<Criteria>;
+      { t.applyConfiguration(config) };
+    };
+
+template <
+    typename Configuration, Criteriable Criteria,
+    Problemable<Configuration, Criteria> Problem>
 class Cooling<Problem, Configuration, Criteria> {
   Problem problem;
   Configuration bestConfiguration;
@@ -51,14 +63,3 @@ class Cooling<Problem, Configuration, Criteria> {
       double stopTemperature, double startTemperature
   );
 };
-
-// =============================================================================
-/**
- * Different approach to generality
- *
- * The Cooling will be interacting with class a class implementing Problem
- * The Problem can be an intermediary class between the SAT and Cooling
- * It will also provide the Criteria value class and calculation
- * It will return the Configurations too
- *
- */
