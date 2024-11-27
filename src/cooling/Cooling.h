@@ -38,10 +38,11 @@ class Problem {
 };
 
 template <typename T>
-concept Criteriable = std::totally_ordered<T> && requires(T t1, T t2) {
-  { t1.howMuchWorseThan(t2) } -> std::convertible_to<double>;
-  { t1.howMuchBetterThan(t2) } -> std::convertible_to<double>;
-};
+concept Criteriable = std::copy_constructible<T> && std::totally_ordered<T> &&
+    requires(T t1, T t2) {
+      { t1.howMuchWorseThan(t2) } -> std::convertible_to<double>;
+      { t1.howMuchBetterThan(t2) } -> std::convertible_to<double>;
+    };
 
 template <typename T, typename Configuration, typename Criteria>
 concept Problemable = requires(T t, Configuration configuration) {
@@ -53,22 +54,36 @@ concept Problemable = requires(T t, Configuration configuration) {
 
 /** Data controlling the schedule of cooling and how long the search lasts */
 struct CoolingSchedule {
-  /** How many steps before ending the search*/
-  uint32_t maxTries;
+  /// @name Temperature control
+  ///@{
   double startTemperature;
-  double stopTemperature;
   double coolingFactor;
   /** How many steps before cooling the temperature */
   uint32_t equilibrium;
+  ///@}
+
+  /// @name Stop control
+  double stopTemperature;
+  uint32_t stopAfterTotalSteps;
+  uint32_t stopAfterNoChange;
+  uint32_t stopAfterNoBetterment;
+
   CoolingSchedule(
-      uint32_t maxTries, uint32_t equilibrium, double coolingFactor,
-      double startTemperature, double stopTemperature
+      uint32_t equilibrium,
+      double coolingFactor,
+      double startTemperature,
+      double stopTemperature,
+      uint32_t stopAfterTotalSteps,
+      uint32_t stopAfterNoChange,
+      uint32_t stopAfterNoBetterment
   )
-      : maxTries(maxTries),
-        startTemperature(startTemperature),
-        stopTemperature(stopTemperature),
+      : startTemperature(startTemperature),
         coolingFactor(coolingFactor),
-        equilibrium(equilibrium) {}
+        equilibrium(equilibrium),
+        stopTemperature(stopTemperature),
+        stopAfterTotalSteps(stopAfterTotalSteps),
+        stopAfterNoChange(stopAfterNoChange),
+        stopAfterNoBetterment(stopAfterNoBetterment) {}
 };
 
 /**
@@ -78,51 +93,101 @@ struct CoolingSchedule {
  * Ownership
  *  - Problem owns his own data and returns copies
  *  - Cooling owns his own copies of Problem data and returns copies
+ *
+ * What is not great:
+ *  - Configuration != State
+ *  - Probably missing abstraction search ending - at the moment a lot of values
+ *  - Cool and frozen could be functors
+ *  - Schedule seems too rigid
  */
-template <typename Configuration, Criteriable Criteria, typename Problem>
+template <
+    std::copy_constructible Configuration,
+    Criteriable Criteria,
+    Problemable Problem>
   requires Problemable<Problem, Configuration, Criteria>
 class Cooling {
  private:
+  // Inputs
   CoolingSchedule schedule;
   Problem problem;
 
-  Configuration bestConfiguration;
-  Criteria bestCriteria;
-
+  // Search state
   Configuration currentConfiguration;
-  uint32_t equilibriumIteration = 0;
-  uint32_t tries = 0;
+  Configuration bestConfiguration;
+  Criteria currentCriteria;
+  Criteria bestCriteria;
   double temperature;
 
+  // Steps
+  uint32_t stepsTotal = 0;
+  uint32_t stepsInEquilibrium = 0;
+  uint32_t stepsSinceChange = 0;
+  uint32_t stepsSinceBetterment = 0;
+
  public:
-  Cooling(Problem problem, Configuration start, CoolingSchedule properties);
+  Cooling(Problem problem, Configuration start, const CoolingSchedule& schedule)
+      : schedule(schedule),
+        problem(problem),
+        currentConfiguration(start),
+        bestConfiguration(start),
+        temperature(schedule.startTemperature) {
+    currentCriteria = problem.evaluateConfiguration(currentConfiguration);
+    bestCriteria = currentCriteria;
+  }
   /** Starting config is chosen at random  */
-  Cooling(Problem problem, CoolingSchedule properties);
+  Cooling(Problem problem, const CoolingSchedule& schedule)
+      : schedule(schedule),
+        problem(problem),
+        temperature(schedule.startTemperature) {
+    currentConfiguration = problem.getRandomConfiguration();
+    bestConfiguration = currentConfiguration;
+    currentCriteria = problem.evaluateConfiguration(currentConfiguration);
+    bestCriteria = currentCriteria;
+  }
 
   /** @name Schedule */
   ///@{
-  bool isOver() const {
-    return schedule.maxTries >= tries || temperature < schedule.stopTemperature;
+  bool isFrozen() const {
+    return temperature <= schedule.stopTemperature ||
+        schedule.stopAfterTotalSteps <= stepsTotal ||
+        schedule.stopAfterNoChange <= stepsSinceChange ||
+        schedule.stopAfterNoBetterment <= stepsSinceBetterment;
   }
-  bool isNotOver() const { return !isOver(); }
-  const CoolingSchedule& schedule();
+  bool notFrozen() const { return !isFrozen(); }
+  const CoolingSchedule& coolingSchedule() { return schedule; }
   ///@}
 
   /// @name Search execution
   ///@{
   /** Does one step in equilibrium @return true if search not over */
-  bool step();
+  bool step() {
+    if (isFrozen()) return false;
+
+    return true;
+    // TODO: Rest
+  }
   /** All necessary steps to next equilibrium @return true if search not over */
-  bool runToNextEquilibrium();
+  bool runToNextEquilibrium() {
+    if (isFrozen()) return false;
+    // TODO: Rest
+  }
   /** Does as many step as necessary to end the search */
-  void runToEnd();
+  void runToEnd() {
+    if (isFrozen()) return;
+    // TODO: Rest
+  }
   ///@}
 
   /// @name Search state
+  /// Return copies of values regarding current search state
   ///@{
-  Configuration copyCurrentConfiguration() const;
-  Configuration copyBestConfiguration() const;
-  Criteria copyBestCriteria() const;
-  Criteria copyCurrentCriteria() const;
+  Configuration copyCurrentConfiguration() const {
+    return Configuration(currentConfiguration);
+  }
+  Configuration copyBestConfiguration() const {
+    return Configuration(bestConfiguration);
+  }
+  Criteria copyCurrentCriteria() const { return Criteria(currentCriteria); }
+  Criteria copyBestCriteria() const { return Criteria(bestCriteria); }
   ///@}
 };

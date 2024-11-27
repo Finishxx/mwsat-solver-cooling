@@ -3,6 +3,9 @@ DerivePointerAlignment: false
 PointerAlignment: Left
 AllowAllArgumentsOnNextLine: false
 BinPackArguments: false
+BinPackParameters: false
 PenaltyBreakBeforeFirstCallParameter: 20000
 AlignAfterOpenBracket: BlockIndent
 AlignTrailingComments: false
+AlignOperands: DontAlign
+PenaltyBreakTemplateDeclaration: 20
