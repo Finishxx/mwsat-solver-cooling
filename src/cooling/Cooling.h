@@ -51,7 +51,8 @@ concept Problemable = requires(T t, Configuration configuration) {
   { t.applyConfiguration(configuration) };
 };
 
-struct CoolingProperties {
+/** Data controlling the schedule of cooling and how long the search lasts */
+struct CoolingSchedule {
   /** How many steps before ending the search*/
   uint32_t maxTries;
   double startTemperature;
@@ -59,7 +60,7 @@ struct CoolingProperties {
   double coolingFactor;
   /** How many steps before cooling the temperature */
   uint32_t equilibrium;
-  CoolingProperties(
+  CoolingSchedule(
       uint32_t maxTries, uint32_t equilibrium, double coolingFactor,
       double startTemperature, double stopTemperature
   )
@@ -71,8 +72,8 @@ struct CoolingProperties {
 };
 
 /**
- * Searches for min/max Criteria producing Configuration given of a given
- * Problem
+ * Searches for best Criteria producing Configuration solving a given Problem
+ * bounded by provided CoolingSchedule
  *
  * Ownership
  *  - Problem owns his own data and returns copies
@@ -82,29 +83,46 @@ template <typename Configuration, Criteriable Criteria, typename Problem>
   requires Problemable<Problem, Configuration, Criteria>
 class Cooling {
  private:
-  CoolingProperties configuration;
+  CoolingSchedule schedule;
   Problem problem;
+
   Configuration bestConfiguration;
-  Configuration currentConfiguration;
   Criteria bestCriteria;
 
+  Configuration currentConfiguration;
+  uint32_t equilibriumIteration = 0;
+  uint32_t tries = 0;
+  double temperature;
+
  public:
-  Cooling(Problem problem, Configuration start, CoolingProperties properties);
+  Cooling(Problem problem, Configuration start, CoolingSchedule properties);
   /** Starting config is chosen at random  */
-  Cooling(Problem problem, CoolingProperties properties);
+  Cooling(Problem problem, CoolingSchedule properties);
 
-  bool isOver() const;
-  bool isNotOver() const;
+  /** @name Schedule */
+  ///@{
+  bool isOver() const {
+    return schedule.maxTries >= tries || temperature < schedule.stopTemperature;
+  }
+  bool isNotOver() const { return !isOver(); }
+  const CoolingSchedule& schedule();
+  ///@}
 
+  /// @name Search execution
+  ///@{
   /** Does one step in equilibrium @return true if search not over */
   bool step();
   /** All necessary steps to next equilibrium @return true if search not over */
-  bool nextEquilibrium();
-  /** Does as many step as necessary end the search */
+  bool runToNextEquilibrium();
+  /** Does as many step as necessary to end the search */
   void runToEnd();
+  ///@}
 
+  /// @name Search state
+  ///@{
   Configuration copyCurrentConfiguration() const;
   Configuration copyBestConfiguration() const;
   Criteria copyBestCriteria() const;
   Criteria copyCurrentCriteria() const;
+  ///@}
 };
