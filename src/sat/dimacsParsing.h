@@ -1,5 +1,5 @@
 #pragma once
-#include <sat.h>
+#include <Sat.h>
 
 #include <istream>
 

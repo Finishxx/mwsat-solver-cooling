@@ -1,4 +1,6 @@
 #pragma once
+#include <ostream>
+#include <vector>
 
 /**
  * An abstraction over underlying data representation which presents the data

@@ -1,4 +1,4 @@
-#include "dimacsParser.h"
+#include "dimacsParsing.h"
 
 // Inspiration here:
 // https://courses.fit.cvut.cz/NI-KOP/tutorials/files/sat-brute-force.html
