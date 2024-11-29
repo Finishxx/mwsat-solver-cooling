@@ -29,13 +29,20 @@ class Criteria {
   double howMuchBetterThan(const Criteria& other) const;
   double howMuchWorseThan(const Criteria& other) const;
 };
-class Configuration {};
+class Configuration {
+ public:
+  bool operator==(const Configuration& other) const;
+  bool operator!=(const Configuration& other) const;
+};
 class Problem {
   Configuration getRandomConfiguration();
   Configuration getRandomNeighbor(const Configuration& configuration);
   Criteria evaluateConfiguration(const Configuration& configuration);
   void applyConfiguration(const Configuration& configuration);
 };
+
+template <typename T>
+concept Configurable = std::equality_comparable && std::copy_constructible;
 
 template <typename T>
 concept Criteriable = std::copy_constructible<T> && std::totally_ordered<T> &&
@@ -100,10 +107,7 @@ struct CoolingSchedule {
  *  - Cool and frozen could be functors
  *  - Schedule seems too rigid
  */
-template <
-    std::copy_constructible Configuration,
-    Criteriable Criteria,
-    Problemable Problem>
+template <Configurable Configuration, Criteriable Criteria, Problemable Problem>
   requires Problemable<Problem, Configuration, Criteria>
 class Cooling {
  private:
@@ -112,8 +116,8 @@ class Cooling {
   Problem problem;
 
   // Search state
-  Configuration currentConfiguration;
-  Configuration bestConfiguration;
+  Configuration currentConfig;
+  Configuration bestConfig;
   Criteria currentCriteria;
   Criteria bestCriteria;
   double temperature;
@@ -128,10 +132,10 @@ class Cooling {
   Cooling(Problem problem, Configuration start, const CoolingSchedule& schedule)
       : schedule(schedule),
         problem(problem),
-        currentConfiguration(start),
-        bestConfiguration(start),
+        currentConfig(start),
+        bestConfig(start),
         temperature(schedule.startTemperature) {
-    currentCriteria = problem.evaluateConfiguration(currentConfiguration);
+    currentCriteria = problem.evaluateConfiguration(currentConfig);
     bestCriteria = currentCriteria;
   }
   /** Starting config is chosen at random  */
@@ -139,9 +143,9 @@ class Cooling {
       : schedule(schedule),
         problem(problem),
         temperature(schedule.startTemperature) {
-    currentConfiguration = problem.getRandomConfiguration();
-    bestConfiguration = currentConfiguration;
-    currentCriteria = problem.evaluateConfiguration(currentConfiguration);
+    currentConfig = problem.getRandomConfiguration();
+    bestConfig = currentConfig;
+    currentCriteria = problem.evaluateConfiguration(currentConfig);
     bestCriteria = currentCriteria;
   }
 
@@ -166,14 +170,48 @@ class Cooling {
     return true;
     // TODO: Rest
   }
-  /** All necessary steps to next equilibrium @return true if search not over */
-  bool runToNextEquilibrium() {
-    if (isFrozen()) return false;
-    // TODO: Rest
-  }
   /** Does as many step as necessary to end the search */
-  void runToEnd() {
-    if (isFrozen()) return;
+  void simulateCooling() {
+    while (notFrozen()) {
+      if (stepsInEquilibrium >= schedule.equilibrium) {
+        temperature = temperature * schedule.coolingFactor;
+        stepsInEquilibrium = 0;
+        continue;
+      }
+
+      stepsInEquilibrium++;
+      stepsTotal++;
+      stepsSinceBetterment++;
+      stepsSinceChange++;
+      Configuration candidate = problem.getRandomNeighbor(candidate);
+      Criteria candidateCriteria = problem.evaluateConfiguration(candidate);
+
+      if (candidate == currentConfig) {  // Can't chagn
+        continue;
+      }
+
+      if (candidateCriteria >= currentCriteria) {
+        currentConfig = candidate;
+        currentCriteria = candidateCriteria;
+        stepsSinceChange = 0;
+        if (candidateCriteria >= bestCriteria) {
+          bestConfig = candidate;
+          bestCriteria = candidateCriteria;
+          stepsSinceBetterment = 0;
+        }
+        problem.applyConfiguration(candidate);
+        continue;
+      }
+
+      // else: decide if we want to apply the less good candidate anyway
+      uint32_t difference = candidateCriteria.howMuchWorseThan(currentCriteria);
+      if (random(0, 1) < exp(-(difference / temperature))) {
+        currentConfig = candidate;
+        currentCriteria = candidateCriteria;
+        stepsSinceChange = 0;
+      }
+    }
+
     // TODO: Rest
   }
   ///@}
@@ -182,10 +220,10 @@ class Cooling {
   /// Return copies of values regarding current search state
   ///@{
   Configuration copyCurrentConfiguration() const {
-    return Configuration(currentConfiguration);
+    return Configuration(currentConfig);
   }
   Configuration copyBestConfiguration() const {
-    return Configuration(bestConfiguration);
+    return Configuration(bestConfig);
   }
   Criteria copyCurrentCriteria() const { return Criteria(currentCriteria); }
   Criteria copyBestCriteria() const { return Criteria(bestCriteria); }
