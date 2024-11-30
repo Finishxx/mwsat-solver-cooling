@@ -95,6 +95,7 @@ struct SatResult {
   // getting: satisfiedClauses, unsatisfiedClauses
 
   bool isSolved() const;
+
   bool isNotSolved() const;
 };
 
