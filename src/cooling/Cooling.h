@@ -3,6 +3,39 @@
 #include <concepts>
 #include <cstdint>
 
+/** Data controlling the schedule of cooling and how long the search lasts */
+struct CoolingSchedule {
+  /// @name Temperature control
+  ///@{
+  double startTemperature;
+  double coolingFactor;
+  /** How many steps before cooling the temperature */
+  uint32_t equilibrium;
+  ///@}
+
+  /// @name Stop control
+  double stopTemperature;
+  uint32_t stopAfterTotalSteps;
+  uint32_t stopAfterNoChange;
+  uint32_t stopAfterNoBetterment;
+
+  CoolingSchedule(
+      uint32_t equilibrium,
+      double coolingFactor,
+      double startTemperature,
+      double stopTemperature,
+      uint32_t stopAfterTotalSteps,
+      uint32_t stopAfterNoChange,
+      uint32_t stopAfterNoBetterment
+  )
+      : startTemperature(startTemperature),
+        coolingFactor(coolingFactor),
+        equilibrium(equilibrium),
+        stopTemperature(stopTemperature),
+        stopAfterTotalSteps(stopAfterTotalSteps),
+        stopAfterNoChange(stopAfterNoChange),
+        stopAfterNoBetterment(stopAfterNoBetterment) {}
+};
 /**
  * Generic simulated cooling solver
  * Requires a Problem, Configuration and Optimization Criteria
@@ -57,40 +90,6 @@ concept Problemable = requires(T t, Configuration configuration) {
   { t.getRandomNeighbor(configuration) } -> std::convertible_to<Configuration>;
   { t.evaluateConfiguration(configuration) } -> std::convertible_to<Criteria>;
   { t.applyConfiguration(configuration) };
-};
-
-/** Data controlling the schedule of cooling and how long the search lasts */
-struct CoolingSchedule {
-  /// @name Temperature control
-  ///@{
-  double startTemperature;
-  double coolingFactor;
-  /** How many steps before cooling the temperature */
-  uint32_t equilibrium;
-  ///@}
-
-  /// @name Stop control
-  double stopTemperature;
-  uint32_t stopAfterTotalSteps;
-  uint32_t stopAfterNoChange;
-  uint32_t stopAfterNoBetterment;
-
-  CoolingSchedule(
-      uint32_t equilibrium,
-      double coolingFactor,
-      double startTemperature,
-      double stopTemperature,
-      uint32_t stopAfterTotalSteps,
-      uint32_t stopAfterNoChange,
-      uint32_t stopAfterNoBetterment
-  )
-      : startTemperature(startTemperature),
-        coolingFactor(coolingFactor),
-        equilibrium(equilibrium),
-        stopTemperature(stopTemperature),
-        stopAfterTotalSteps(stopAfterTotalSteps),
-        stopAfterNoChange(stopAfterNoChange),
-        stopAfterNoBetterment(stopAfterNoBetterment) {}
 };
 
 /**
