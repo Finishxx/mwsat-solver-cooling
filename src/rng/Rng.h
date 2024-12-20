@@ -4,19 +4,14 @@
 #include <memory>
 #include <optional>
 
-#include "xoshiro256plus.h"
-
-/**
- * Wrapper for xoshiro256plus generator
- *
- * Uses the factory pattern for named construction
- */
+/** Facade for xoshiro256plus generator */
 class Rng {
  public:
+  std::array<uint64_t, 4> getState() const;
+
   static uint64_t next();
   static double nextDouble();
   /** @return true on success */
-  static bool writeStateToFile(std::ofstream& ofs);
-  static void initWithSeed(rng_seed_t seed);
-  static void initWithState(rng_state_t state);
+  static void initWithSeed(uint64_t seed);
+  static void initWithState(std::array<uint64_t, 4> state);
 };
