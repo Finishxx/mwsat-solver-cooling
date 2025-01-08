@@ -1,30 +1,60 @@
-#include <boost/program_options.hpp>
+#include <CLI/CLI.hpp>
+#include <filesystem>
 #include <iostream>
 
-namespace po = boost::program_options;
-// https://www.boost.org/doc/libs/1_86_0/doc/html/program_options/tutorial.html#id-1.3.30.4.3
-int main(int ac, char** av) {
-  // Declare the supported options.
-  po::options_description desc("Allowed options");
-  desc.add_options()("help", "produce help message")(
-      "compression",
-      po::value<int>(),
-      "set compression level"
-  );
+int main(int argc, char** argv) {
+  CLI::App app{"App description"};
 
-  po::variables_map vm;
-  po::store(po::parse_command_line(ac, av, desc), vm);
-  po::notify(vm);
+  std::filesystem::path inputPath;
+  app.add_option("-f,--file", inputPath, "A help string")->required();
 
-  if (vm.count("help")) {
-    std::cout << desc << "\n";
+  std::string seed;
+  app.add_option("-s,--seed", seed, "64-bit hex seed")->required();
+
+  double initialTemperature;
+  app.add_option("-t,--startTemperature", initialTemperature)->required();
+
+  double finalTemperature;
+  app.add_option("-T,--endTemperature", finalTemperature)->required();
+
+  double cooling;
+  app.add_option("-c,--cooling", cooling, "Cooling coefficient")->required();
+
+  uint32_t equilibrium;
+  app.add_option("-e,--equilibrium", equilibrium)->required();
+
+  std::filesystem::path debugFile;
+  app.add_option(
+         "-d,--debug",
+         debugFile,
+         "Where to write <stepNum> <currentSatisfied> <currentWeight> "
+         "<maxWeight> on each line per step"
+  )
+      ->required();
+
+  uint32_t maxIter;
+  app.add_option("-i,--maxIter", maxIter, "Iterations before end")->required();
+
+  uint32_t withoutGain;
+  app.add_option("-g,--gain", withoutGain, "End after steps without gain")
+      ->required();
+
+  uint32_t withoutChange;
+  app.add_option(
+         "-a,--adjustment",
+         withoutChange,
+         "End after steps without change"
+  )
+      ->required();
+
+  CLI11_PARSE(app, argc, argv);
+
+  // std::err << stepTotal << " " << lastChange << " " << wasSatisfied << " " <<
+  // maxWeight << std::endl;
+
+  bool success = true;
+  if (success)
+    return 0;
+  else
     return 1;
-  }
-
-  if (vm.count("compression")) {
-    std::cout << "Compression level was set to " << vm["compression"].as<int>()
-              << ".\n";
-  } else {
-    std::cout << "Compression level was not set.\n";
-  }
 }
