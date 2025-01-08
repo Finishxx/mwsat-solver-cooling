@@ -8,8 +8,9 @@ int main(int argc, char** argv) {
   std::filesystem::path inputPath;
   app.add_option("-f,--file", inputPath, "A help string")->required();
 
-  std::string seed;
-  app.add_option("-s,--seed", seed, "64-bit hex seed")->required();
+  std::string seedStr;
+  uint64_t seed;
+  app.add_option("-s,--seed", seedStr, "64-bit hex seed")->required();
 
   double initialTemperature;
   app.add_option("-t,--startTemperature", initialTemperature)->required();
@@ -25,12 +26,11 @@ int main(int argc, char** argv) {
 
   std::filesystem::path debugFile;
   app.add_option(
-         "-d,--debug",
-         debugFile,
-         "Where to write <stepNum> <currentSatisfied> <currentWeight> "
-         "<maxWeight> on each line per step"
-  )
-      ->required();
+      "-d,--debug",
+      debugFile,
+      "Where to write <stepNum> <currentSatisfied> <currentWeight> "
+      "<maxWeight> on each line per step"
+  );
 
   uint32_t maxIter;
   app.add_option("-i,--maxIter", maxIter, "Iterations before end")->required();
@@ -49,12 +49,23 @@ int main(int argc, char** argv) {
 
   CLI11_PARSE(app, argc, argv);
 
+  if (!exists(inputPath)) {
+    std::cerr << "Input file " << inputPath << " does not exist" << std::endl;
+    return EXIT_FAILURE;
+  }
+  try {
+    seed = std::stoi(seedStr);
+  } catch (...) {
+    std::cerr << "Invalid seed: " << seedStr << std::endl;
+    return EXIT_FAILURE;
+  }
+
+  // We don't check others, because that is domain-dependent
+
+  seed;
+
   // std::err << stepTotal << " " << lastChange << " " << wasSatisfied << " " <<
   // maxWeight << std::endl;
 
-  bool success = true;
-  if (success)
-    return 0;
-  else
-    return 1;
+  return 0;
 }
