@@ -9,3 +9,4 @@ AlignAfterOpenBracket: BlockIndent
 AlignTrailingComments: false
 AlignOperands: DontAlign
 PenaltyBreakTemplateDeclaration: 20
+ColumnLimit: 100

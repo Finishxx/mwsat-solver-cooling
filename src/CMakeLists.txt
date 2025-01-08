@@ -11,6 +11,7 @@ target_link_libraries(
 
 add_executable(main main.cpp)
 
+# CLI11
 include(FetchContent)
 FetchContent_Declare(
         cli11_proj
@@ -18,8 +19,13 @@ FetchContent_Declare(
         GIT_REPOSITORY https://github.com/CLIUtils/CLI11.git
         GIT_TAG v2.3.2
 )
-
 FetchContent_MakeAvailable(cli11_proj)
-
-# And now you can use it
 target_link_libraries(main PRIVATE CLI11::CLI11)
+
+
+# FMT
+FetchContent_Declare(
+        fmt
+        GIT_REPOSITORY https://github.com/fmtlib/fmt
+        GIT_TAG e69e5f977d458f2650bb346dadf2ad30c5320281) # 10.2.1
+FetchContent_MakeAvailable(fmt)
