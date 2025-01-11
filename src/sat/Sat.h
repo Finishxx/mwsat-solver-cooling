@@ -2,41 +2,39 @@
 #include <ostream>
 #include <vector>
 
-/**
- * An abstraction over underlying data representation which presents the data
- * in human understandable format. In essence just knows where in the input the
- * clause starts and how long it is.
- */
-struct SatClause {
-  size_t id;  // index of clause
-  size_t startIndex;  // start index inside underlying
-  size_t size;  // size of clause
-  std::vector<int32_t>* underlying;
+struct Term {
+  int32_t underlying;
+  explicit Term(int32_t underlying) : underlying(underlying) {}
 
-  SatClause(size_t start, size_t size, const std::vector<int32_t>& underlying);
-
-  // Maybe useless class after all? TODO: Try to add some helpers at least
-  friend std::ostream& operator<<(std::ostream& os, const SatClause& dt);
-  bool isSatisfied() const;
-  bool isNotSatisfied() const;
+  bool isNegated() const { return underlying < 0; }
+  bool isNotNegated() const { return underlying > 0; }
 };
 
 /**
- * Holds where everywhere is the variable used
+ * An abstraction over underlying data representation which presents the data
+ * in human understandable format.
+ */
+struct SatClause {
+  std::vector<int32_t> underlying;
+
+  explicit SatClause(std::vector<int32_t>&& underlying_) : underlying(underlying_) {
+    underlying = std::move(underlying_);
+  }
+};
+
+/**
+ * Holds where is the variable used
  */
 struct VariableInfo {
-  std::vector<size_t> ids;  // sorted indices of variable occurence
-  std::vector<bool> used;  // bitset of variable occurence
+  /** sorted indices of variable occurrence */
+  std::vector<const SatClause*> clauses;
 
-  // sorted indices of variable occurence in (non)satisfied clauses
-  std::vector<size_t> satisfied;
-  std::vector<size_t> notSatisfied;
+  /** clauses, where it is satisfied */
+  std::vector<const SatClause*> satisfied;
+  /** sorted clauses, where it is not satisfied */
+  std::vector<const SatClause*> notSatisfied;
 
-  // Clauses in where the variable is inside of
-  std::vector<SatClause*> clauses;
-
-  // Maybe add underlying to constructor too
-  VariableInfo(const std::vector<SatClause>& clauses);
+  explicit VariableInfo(const std::vector<SatClause>& clauses);
   friend std::ostream& operator<<(std::ostream& os, const VariableInfo& dt);
 };
 
@@ -57,9 +55,7 @@ class SatInput {
   std::vector<SatClause> clauses;
   std::vector<VariableInfo> variables;
   std::vector<int32_t> underlying;
-  SatInput(
-      std::vector<SatClause>&& clauses, std::vector<VariableInfo>&& variables
-  );
+  SatInput(std::vector<SatClause>&& clauses, std::vector<VariableInfo>&& variables);
 };
 
 /**
