@@ -1,7 +1,6 @@
 #pragma once
-#include <Sat.h>
-
 #include <istream>
+#include <vector>
 
 struct ParsedDimacsFile {
   ParsedDimacsFile(

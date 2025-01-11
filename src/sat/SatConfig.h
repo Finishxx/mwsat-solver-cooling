@@ -4,6 +4,7 @@
 
 #include "MaxWSatInstance.h"
 
+/** Mutable */
 struct SatConfig {
   MaxWSatInstance* instance;
   std::vector<bool> underlying;

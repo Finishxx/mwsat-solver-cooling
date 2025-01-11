@@ -18,10 +18,14 @@ class Term {
 
 class Clause {
  private:
-  std::vector<Term> disjuncts;
+  /** Unique and sorted */
+  std::vector<Term> disjuncts_;
 
  public:
-  const std::vector<Term>& disjunct() const;
+  Clause(std::vector<Term>&& disjuncts);
+  /** Unique and sorted */
+  const std::vector<Term>& disjuncts() const { return disjuncts_; };
+  /** Expensive operation - all pairs must be evaluated */
   bool isSatisfiable() const;
 };
 
@@ -46,7 +50,9 @@ class MaxWSatInstance {
  public:
   const std::vector<Variable>& variables() const;
   const std::vector<Clause>& clauses() const;
-  MaxWSatInstance(std::vector<std::vector<int32_t>>& clauses, std::vector<int32_t>& weights);
+  MaxWSatInstance(
+      std::vector<std::vector<int32_t>>& clauses, std::vector<int32_t>& weights
+  );
 };
 
 #endif  // MAXWSATINSTANCE_H

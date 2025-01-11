@@ -1,12 +1,11 @@
 BasedOnStyle: Google
 DerivePointerAlignment: false
 PointerAlignment: Left
-AllowAllArgumentsOnNextLine: false
+AllowAllArgumentsOnNextLine: true
 BinPackArguments: false
 BinPackParameters: false
-PenaltyBreakBeforeFirstCallParameter: 20000
 AlignAfterOpenBracket: BlockIndent
 AlignTrailingComments: false
 AlignOperands: DontAlign
 PenaltyBreakTemplateDeclaration: 20
-ColumnLimit: 100
+ColumnLimit: 80
