@@ -8,6 +8,7 @@
 struct SatConfig {
   MaxWSatInstance* instance;
   std::vector<bool> underlying;
+  SatConfig() = default;
   SatConfig(MaxWSatInstance* instance, std::vector<bool>&& underlying);
 };
 

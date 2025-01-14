@@ -6,11 +6,11 @@
 #include <ranges>
 
 // ===================== Term =====================
-// Term implemented entirely in the header
 Term::Term(int32_t underlying) : underlying(underlying) {}
 uint32_t Term::id() const { return std::abs(underlying); }
 bool Term::isNegated() const { return underlying < 0; }
 bool Term::isPlain() const { return underlying > 0; }
+Term Term::flip() const { return Term(-underlying); }
 // ===================== EndTerm =====================
 
 // ===================== Clause =====================
@@ -85,9 +85,6 @@ MaxWSatInstance::MaxWSatInstance(
     }
     clauses_.emplace_back(std::move(terms));
   }
-  assert(std::ranges::all_of(clauses_, [](const Clause& clause) {
-    return clause.isSatisfiable();
-  }));
 
   // Initialize Variables
   // Weights: Seq<int32_t> => Seq<Variable>
@@ -95,6 +92,11 @@ MaxWSatInstance::MaxWSatInstance(
   for (uint32_t i = 0; i < weights.size(); i++) {
     variables_.emplace_back(i, weights.at(i), clauses_);
   }
+}
+bool MaxWSatInstance::isSatisfiable() const {
+  return std::ranges::all_of(clauses_, [](const Clause& clause) {
+    return clause.isSatisfiable();
+  });
 }
 
 // ===================== EndInstance =====================

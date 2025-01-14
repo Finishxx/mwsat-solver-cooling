@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <vector>
 
+/** Term with given id can be either plain or negated */
 class Term {
  private:
   int32_t underlying;
@@ -13,11 +14,11 @@ class Term {
   explicit Term(int32_t underlying);
   [[nodiscard]] uint32_t id() const;
   [[nodiscard]] bool isNegated() const;
-  ;
   [[nodiscard]] bool isPlain() const;
-  ;
+  Term flip() const;
 };
 
+/** Clause in CNF - Terms with disjunction between them */
 class Clause {
  private:
   /** Unique and sorted */
@@ -27,16 +28,16 @@ class Clause {
   explicit Clause(std::vector<Term>&& disjuncts);
   /** Unique and sorted */
   [[nodiscard]] const std::vector<Term>& disjuncts() const;
-  ;
   /** Expensive operation - all pairs must be evaluated */
   [[nodiscard]] bool isSatisfiable() const;
   [[nodiscard]] bool containsVariable(uint32_t variableId) const;
 };
 
+/** Holds info regarding a variable with given id */
 class Variable {
  private:
-  uint32_t id_{};
-  int32_t weight_{};
+  uint32_t id_;
+  int32_t weight_;
   std::vector<const Clause*> occurences_;
 
  public:
@@ -48,7 +49,7 @@ class Variable {
   );
 };
 
-/** Owns all Variables and Clauses */
+/** Immutable Max Weighted SAT instance */
 class MaxWSatInstance {
  private:
   std::vector<Variable> variables_;
@@ -60,6 +61,8 @@ class MaxWSatInstance {
   MaxWSatInstance(
       std::vector<std::vector<int32_t>>& clauses, std::vector<int32_t>& weights
   );
+  /** Slow, because it calls isSatisfiable() on all clauses */
+  bool isSatisfiable() const;
 };
 
 #endif  // MAXWSATINSTANCE_H
