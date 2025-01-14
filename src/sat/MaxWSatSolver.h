@@ -19,7 +19,6 @@ class MaxWSatSolver {
  private:
   class LiveTerm {
    private:
-    uint32_t id_;
     bool isSet_;
     bool isSatisfied_;
     Term original;

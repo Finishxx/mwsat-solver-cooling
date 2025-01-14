@@ -3,32 +3,38 @@
 // ===================== LiveTerm =====================
 MaxWSatSolver::LiveTerm::LiveTerm(Term original, bool isSet)
     : isSet_(isSet), original(original) {
-  id_ = original.id();
-  if (isSet && original.isPlain || !isSet && original.isNegated()) {
+  if ((isSet && original.isPlain()) || (!isSet && original.isNegated())) {
     isSatisfied_ = true;
   } else {
-    isSet_ = false;
+    isSatisfied_ = false;
   }
 }
 const Term& MaxWSatSolver::LiveTerm::originalTerm() const { return original; }
-uint32_t MaxWSatSolver::LiveTerm::id() const { return id_; }
-bool MaxWSatSolver::LiveTerm::isSatisfied() const { return isSet_; }
+uint32_t MaxWSatSolver::LiveTerm::id() const { return original.id(); }
+bool MaxWSatSolver::LiveTerm::isSatisfied() const { return isSatisfied_; }
 bool MaxWSatSolver::LiveTerm::isSet() const { return isSet_; }
 bool MaxWSatSolver::LiveTerm::isUnset() const { return !isSet_; }
 void MaxWSatSolver::LiveTerm::set() {
-  if (isSet_) return;
-  isSet_ = true;
-  isSatisfied_ = !isSatisfied_;
+  if (!isSet_) {
+    isSet_ = true;
+    // Satisfied if set and the original was plain
+    isSatisfied_ = original.isPlain();
+  }
 }
+
 void MaxWSatSolver::LiveTerm::unset() {
-  if (!isSet_) return;
-  isSet_ = false;
-  isSatisfied_ = !isSatisfied_;
+  if (isSet_) {
+    isSet_ = false;
+    // Satisfied if unset and the original was negated
+    isSatisfied_ = original.isNegated();
+  }
 }
+
 void MaxWSatSolver::LiveTerm::flip() {
   isSet_ = !isSet_;
   isSatisfied_ = !isSatisfied_;
 }
+
 // ===================== EndLiveTerm =====================
 
 void MaxWSatSolver::setConfig(SatConfig& config) {
