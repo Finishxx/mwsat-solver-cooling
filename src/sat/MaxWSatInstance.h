@@ -10,10 +10,12 @@ class Term {
 
  public:
   /** If the given int is negative, then the term is negated, plain otherwise */
-  Term(int32_t underlying) : underlying(underlying) {}
-  uint32_t id() const { return std::abs(underlying); };
-  bool isNegated() const { return underlying < 0; };
-  bool isPlain() const { return underlying > 0; };
+  explicit Term(int32_t underlying);
+  [[nodiscard]] uint32_t id() const;
+  [[nodiscard]] bool isNegated() const;
+  ;
+  [[nodiscard]] bool isPlain() const;
+  ;
 };
 
 class Clause {
@@ -22,23 +24,28 @@ class Clause {
   std::vector<Term> disjuncts_;
 
  public:
-  Clause(std::vector<Term>&& disjuncts);
+  explicit Clause(std::vector<Term>&& disjuncts);
   /** Unique and sorted */
-  const std::vector<Term>& disjuncts() const { return disjuncts_; };
+  [[nodiscard]] const std::vector<Term>& disjuncts() const;
+  ;
   /** Expensive operation - all pairs must be evaluated */
-  bool isSatisfiable() const;
+  [[nodiscard]] bool isSatisfiable() const;
+  [[nodiscard]] bool containsVariable(uint32_t variableId) const;
 };
 
 class Variable {
  private:
-  uint32_t id_;
-  int32_t weight_;
-  std::vector<Clause*> occurences_;
+  uint32_t id_{};
+  int32_t weight_{};
+  std::vector<const Clause*> occurences_;
 
  public:
-  uint32_t id() const;
-  int32_t weight() const;
-  const std::vector<Clause*>& occurences() const;
+  [[nodiscard]] uint32_t id() const;
+  [[nodiscard]] int32_t weight() const;
+  [[nodiscard]] const std::vector<const Clause*>& occurences() const;
+  explicit Variable(
+      uint32_t id, int32_t weight, const std::vector<Clause>& allClauses
+  );
 };
 
 /** Owns all Variables and Clauses */
@@ -48,8 +55,8 @@ class MaxWSatInstance {
   std::vector<Clause> clauses_;
 
  public:
-  const std::vector<Variable>& variables() const;
-  const std::vector<Clause>& clauses() const;
+  [[nodiscard]] const std::vector<Variable>& variables() const;
+  [[nodiscard]] const std::vector<Clause>& clauses() const;
   MaxWSatInstance(
       std::vector<std::vector<int32_t>>& clauses, std::vector<int32_t>& weights
   );
