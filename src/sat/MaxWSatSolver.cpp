@@ -55,19 +55,14 @@ MaxWSatSolver::LiveTerm* MaxWSatSolver::LiveClause::findTerm(uint32_t termId) {
   return &(*term);
 }
 MaxWSatSolver::LiveClause::LiveClause(Clause* clause, SatConfig& config)
-    : original(clause) {
+    : original(clause), satisfiedCount(0) {
   terms_.reserve(clause->disjuncts().size());
   for (const auto& term : clause->disjuncts()) {
-    terms_.emplace_back(term, config.underlying[term.id()]);
+    LiveTerm& ref = terms_.emplace_back(term, config.underlying[term.id()]);
+    if (ref.isSatisfied()) satisfiedCount += 1;
   }
   if (!std::ranges::is_sorted(terms_, std::less<>{}, &LiveTerm::id)) {
-    std::sort(
-        terms_.begin(),
-        terms_.end(),
-        [](const LiveTerm& lhs, const LiveTerm& rhs) {
-          return lhs.id() < rhs.id();
-        }
-    );
+    std::ranges::sort(terms_, {}, &LiveTerm::id);
   }
 }
 
