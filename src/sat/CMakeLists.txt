@@ -9,8 +9,8 @@ add_library(max_weighted_sat_solver
         MaxWSatInstance.h
         SatConfig.h
         SatConfig.cpp
-        Sat.cpp
         EvaluatedWSatConfig.cpp
         EvaluatedWSatConfig.h)
+
 
 target_include_directories(max_weighted_sat_solver PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

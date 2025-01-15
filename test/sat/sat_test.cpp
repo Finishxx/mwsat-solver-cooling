@@ -1,4 +1,3 @@
-#include "Sat.h"
 
 #include <gtest/gtest.h>
 

@@ -1,5 +1,6 @@
 #ifndef MAXWSATSOLVER_H
 #define MAXWSATSOLVER_H
+#include <optional>
 #include <vector>
 
 #include "EvaluatedWSatConfig.h"
@@ -24,28 +25,43 @@ class MaxWSatSolver {
     Term original;
 
    public:
+    bool operator<(const LiveTerm& other) const;
     LiveTerm(Term original, bool isSet);
-    const Term& originalTerm() const;
-    uint32_t id() const;
-    bool isSatisfied() const;
-    bool isSet() const;
-    bool isUnset() const;
+    LiveTerm(const LiveTerm& term) = default;
+    LiveTerm& operator=(const LiveTerm& other) = default;
+    [[nodiscard]] const Term& originalTerm() const;
+    [[nodiscard]] uint32_t id() const;
+    [[nodiscard]] bool isSatisfied() const;
+    [[nodiscard]] bool isSet() const;
+    [[nodiscard]] bool isUnset() const;
     void set();
     void unset();
     void flip();
   };
 
-  /** Keeps track of  */
   class LiveClause {
    private:
-    uint32_t satisfiedTerms;
-    /** Sorted terms by id, the Term  */
-    std::vector<Term> terms;
+    uint32_t satisfiedCount;
+    /** Sorted terms by id representing the Clause */
+    std::vector<LiveTerm> terms_;
     Clause* original;
 
+    LiveTerm* findTerm(uint32_t);
+
    public:
-    const Clause& originalClause() const;
     LiveClause(Clause* clause, SatConfig& config);
+
+    [[nodiscard]] const Clause& originalClause() const;
+    [[nodiscard]] const std::vector<LiveTerm>& terms() const;
+    /** Returns null if Term with given id is not present */
+    [[nodiscard]] const LiveTerm* getTerm(uint32_t id) const;
+
+    /** Does nothing if given variable id, which is not in the clause */
+    void setVariable(uint32_t variableId);
+    /** Does nothing if given variable id, which is not in the clause */
+    void unsetVariable(uint32_t variableId);
+    /** Does nothing if given variable id, which is not in the clause */
+    void flipVariable(uint32_t variableId);
   };
 
   class LiveVariable {

@@ -1,8 +1,8 @@
 #include "MaxWSatInstance.h"
 
 #include <assert.h>
-#include <bits/ranges_algo.h>
 
+#include <algorithm>
 #include <ranges>
 
 // ===================== Term =====================
@@ -18,9 +18,11 @@ Clause::Clause(std::vector<Term>&& disjuncts) {
   std::ranges::sort(disjuncts_, [](const Term& t1, const Term& t2) {
     return t1.id() < t2.id();
   });
-  std::ranges::unique(disjuncts_, [](const Term& t1, const Term& t2) {
-    return t1.id() == t2.id();
-  });
+  auto duplicates =
+      std::ranges::unique(disjuncts_, [](const Term& t1, const Term& t2) {
+        return t1.id() == t2.id();
+      });
+  disjuncts_.erase(duplicates.begin(), duplicates.end());
 }
 const std::vector<Term>& Clause::disjuncts() const { return disjuncts_; }
 
@@ -79,7 +81,8 @@ MaxWSatInstance::MaxWSatInstance(
   // Initialize clauses
   for (const std::vector<int32_t>& clause : clauses) {
     // Initialize each Term in clause
-    std::vector<Term> terms = std::vector<Term>(clause.size());
+    std::vector<Term> terms = std::vector<Term>();
+    terms.reserve(clause.size());
     for (int32_t term : clause) {
       terms.emplace_back(term);
     }

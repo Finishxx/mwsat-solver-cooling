@@ -1,6 +1,5 @@
 #ifndef MAXWSATINSTANCE_H
 #define MAXWSATINSTANCE_H
-#include <cmath>
 #include <cstdint>
 #include <vector>
 
@@ -12,6 +11,8 @@ class Term {
  public:
   /** If the given int is negative, then the term is negated, plain otherwise */
   explicit Term(int32_t underlying);
+  Term(const Term& term) = default;
+  Term& operator=(const Term& term) = default;
   [[nodiscard]] uint32_t id() const;
   [[nodiscard]] bool isNegated() const;
   [[nodiscard]] bool isPlain() const;
@@ -26,6 +27,10 @@ class Clause {
 
  public:
   explicit Clause(std::vector<Term>&& disjuncts);
+  Clause(const Clause& clause) = default;
+  Clause& operator=(const Clause& clause) = default;
+  Clause(Clause&& clause) = default;
+  Clause& operator=(Clause&& clause) = default;
   /** Unique and sorted */
   [[nodiscard]] const std::vector<Term>& disjuncts() const;
   /** Expensive operation - all pairs must be evaluated */
@@ -47,6 +52,10 @@ class Variable {
   explicit Variable(
       uint32_t id, int32_t weight, const std::vector<Clause>& allClauses
   );
+  Variable(const Variable& variable) = default;
+  Variable& operator=(const Variable& variable) = default;
+  Variable(Variable&& variable) = default;
+  Variable& operator=(Variable&& variable) = default;
 };
 
 /** Immutable Max Weighted SAT instance */
