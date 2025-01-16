@@ -44,12 +44,12 @@ class MaxWSatSolver {
     uint32_t satisfiedCount;
     /** Sorted terms by id representing the Clause */
     std::vector<LiveTerm> terms_;
-    Clause* original;
+    const Clause* original;
 
     LiveTerm* findTerm(uint32_t);
 
    public:
-    LiveClause(Clause* clause, SatConfig& config);
+    LiveClause(const Clause* clause, SatConfig& config);
 
     [[nodiscard]] const Clause& originalClause() const;
     [[nodiscard]] const std::vector<LiveTerm>& terms() const;
@@ -64,9 +64,11 @@ class MaxWSatSolver {
     void flipVariable(uint32_t variableId);
   };
 
+  /** Possible optimization would be to also memorize the LiveTerms */
   class LiveVariable {
    public:
-    Variable* variable;
+    LiveVariable(const Variable* variable);
+    const Variable* variable;
     std::vector<LiveClause*> clauses;
   };
 

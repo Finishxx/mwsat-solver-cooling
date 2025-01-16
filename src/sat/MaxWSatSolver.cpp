@@ -1,6 +1,7 @@
 #include "MaxWSatSolver.h"
 
 #include <algorithm>
+#include <cassert>
 
 // ===================== LiveTerm =====================
 
@@ -54,7 +55,7 @@ MaxWSatSolver::LiveTerm* MaxWSatSolver::LiveClause::findTerm(uint32_t termId) {
   }
   return &(*term);
 }
-MaxWSatSolver::LiveClause::LiveClause(Clause* clause, SatConfig& config)
+MaxWSatSolver::LiveClause::LiveClause(const Clause* clause, SatConfig& config)
     : original(clause), satisfiedCount(0) {
   terms_.reserve(clause->disjuncts().size());
   for (const auto& term : clause->disjuncts()) {
@@ -120,19 +121,43 @@ void MaxWSatSolver::LiveClause::flipVariable(uint32_t variableId) {
 
 // ===================== End LiveClause =====================
 
+// ===================== LiveVariable =====================
+
+MaxWSatSolver::LiveVariable::LiveVariable(const Variable* variable)
+    : variable(variable) {}
+
+// ===================== End LiveVariable =====================
+
 // ===================== MaxWSatSolver =====================
 
 void MaxWSatSolver::setConfig(SatConfig& config) {
+  assert(config.underlying.size() == instance_->variables().size());
+  // Clear previous context
   variables.clear();
   clauses.clear();
 
-  config_ = EvaluatedWSatConfig(*instance_, SatConfig(config), 0, false, 0);
+  // Init clauses
+  clauses.reserve(instance_->clauses().size());
+  for (const Clause& clause : instance_->clauses()) {
+    LiveClause(&clause, config);
+  }
+
+  // Init variables
+  for (const Variable& variable : instance_->variables()) {
+    variables.push_back(&variable);
+  }
+
+  for (LiveClause& clause : clauses) {
+    for (const LiveTerm& term : clause.terms()) {
+      variables[term.id()].clauses.push_back(&clause);
+    }
+  }
 }
 
 MaxWSatSolver::MaxWSatSolver(
     MaxWSatInstance& instance, SatConfig& initialConfig
-) {
-  instance_ = &instance;
+)
+    : instance_(&instance) {
   setConfig(initialConfig);
 }
 
