@@ -70,6 +70,7 @@ class MaxWSatSolver {
     LiveVariable(const Variable* variable);
     const Variable* variable;
     std::vector<LiveClause*> clauses;
+    [[nodiscard]] uint32_t weight() const;
   };
 
   /** Indexed by variable id */

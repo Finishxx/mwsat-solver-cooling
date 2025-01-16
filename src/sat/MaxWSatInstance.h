@@ -16,7 +16,6 @@ class Term {
   [[nodiscard]] uint32_t id() const;
   [[nodiscard]] bool isNegated() const;
   [[nodiscard]] bool isPlain() const;
-  Term flip() const;
 };
 
 /** Clause in CNF - Terms with disjunction between them */
@@ -71,7 +70,7 @@ class MaxWSatInstance {
       std::vector<std::vector<int32_t>>& clauses, std::vector<int32_t>& weights
   );
   /** Slow, because it calls isSatisfiable() on all clauses */
-  bool isSatisfiable() const;
+  [[nodiscard]] bool isSatisfiable() const;
 };
 
 #endif  // MAXWSATINSTANCE_H
