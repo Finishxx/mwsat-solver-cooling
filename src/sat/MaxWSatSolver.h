@@ -55,6 +55,7 @@ class MaxWSatSolver {
     [[nodiscard]] const std::vector<LiveTerm>& terms() const;
     /** Returns null if Term with given id is not present */
     [[nodiscard]] const LiveTerm* getTerm(uint32_t id) const;
+    [[nodiscard]] const bool isSatisfied() const;
 
     /** Does nothing if given variable id, which is not in the clause */
     void setVariable(uint32_t variableId);
@@ -66,8 +67,10 @@ class MaxWSatSolver {
 
   /** Initialized by the Solver */
   struct LiveVariable {
+    LiveVariable(const Variable* variable, bool isSet);
     const Variable* original;
     std::vector<LiveClause*> occurrences;
+    bool isSet;
     [[nodiscard]] uint32_t weight() const;
     [[nodiscard]] uint32_t id() const;
   };
@@ -87,7 +90,7 @@ class MaxWSatSolver {
 
   MaxWSatSolver(MaxWSatInstance& instance, SatConfig& initialConfig);
 
-  const EvaluatedWSatConfig& currentConfiguration() const;
+  [[nodiscard]] const EvaluatedWSatConfig& currentConfiguration() const;
   /** Creates copy of currentConfiguration */
   EvaluatedWSatConfig exportConfiguration() const;
   const MaxWSatInstance& instance() const;

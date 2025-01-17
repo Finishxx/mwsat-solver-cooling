@@ -84,6 +84,9 @@ const MaxWSatSolver::LiveTerm* MaxWSatSolver::LiveClause::getTerm(uint32_t id
   }
   return &(*term);
 }
+const bool MaxWSatSolver::LiveClause::isSatisfied() const {
+  return satisfiedCount == terms_.size();
+}
 void MaxWSatSolver::LiveClause::setVariable(uint32_t variableId) {
   LiveTerm* term = findTerm(variableId);
   if (term == nullptr || term->isSet()) return;
@@ -117,6 +120,8 @@ void MaxWSatSolver::LiveClause::flipVariable(uint32_t variableId) {
     satisfiedCount -= 1;
   }
 }
+MaxWSatSolver::LiveVariable::LiveVariable(const Variable* variable, bool isSet)
+    : original(variable), isSet(isSet) {}
 
 // ===================== End LiveClause =====================
 
@@ -131,9 +136,17 @@ uint32_t MaxWSatSolver::LiveVariable::id() const { return original->id(); }
 
 // ===================== MaxWSatSolver =====================
 
+void MaxWSatSolver::flipVariable(uint32_t variableId) {
+  auto variable = variables[variableId];
+
+  for (LiveClause* clause : variable.occurrences) {
+    // TODO:
+  }
+}
+
 void MaxWSatSolver::setConfig(SatConfig& config) {
   assert(config.underlying.size() == instance_->variables().size());
-  // Clear previous context
+  // Clear previous context                      n
   variables.clear();
   clauses.clear();
 
@@ -143,9 +156,10 @@ void MaxWSatSolver::setConfig(SatConfig& config) {
     LiveClause(&clause, config);
   }
 
+  variables.reserve(instance_->variables().size());
   // Init variables
   for (const Variable& variable : instance_->variables()) {
-    variables.emplace_back(&variable);
+    variables.emplace_back(&variable, config.underlying[variable.id()]);
   }
 
   for (LiveClause& clause : clauses) {
@@ -153,6 +167,18 @@ void MaxWSatSolver::setConfig(SatConfig& config) {
       variables[term.id()].occurrences.push_back(&clause);
     }
   }
+  auto satisfiedCount = std::ranges::count_if(
+      clauses, [](const LiveClause& clause) { return clause.isSatisfied(); }
+  );
+  uint32_t weight = 0;
+  for (uint32_t variableId = 0; variableId < variables.size(); variableId++) {
+    if (config.underlying[variableId] == true)
+      weight += variables[variableId].weight();
+  }
+
+  config_ = EvaluatedWSatConfig(
+      *instance_, std::move(config), weight, satisfiedCount
+  );
 }
 
 MaxWSatSolver::MaxWSatSolver(

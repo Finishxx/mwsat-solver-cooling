@@ -11,14 +11,13 @@ struct EvaluatedWSatConfig {
       MaxWSatInstance& instance,
       SatConfig&& configuration,
       uint32_t weight,
-      bool is_satisfied,
       uint32_t satisfied_count
   );
 
   MaxWSatInstance* instance;
   SatConfig configuration;
   uint32_t weight;
-  bool isSatisfied;
+  [[nodiscard]] bool isSatisfied() const;
   uint32_t satisfiedCount;
 };
 
