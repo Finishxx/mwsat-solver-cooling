@@ -3,13 +3,24 @@
 EvaluatedWSatConfig::EvaluatedWSatConfig(
     MaxWSatInstance& instance,
     SatConfig&& configuration,
-    uint32_t weight,
     uint32_t satisfied_count
 )
     : instance(&instance),
       configuration(std::move(configuration)),
-      weight(weight),
-      satisfiedCount(satisfied_count) {}
+      satisfiedCount(satisfied_count) {
+  weight = calculateWeight();
+}
+
+int32_t EvaluatedWSatConfig::calculateWeight() const {
+  int32_t total = 0;
+  for (uint32_t variableId = 0; variableId < instance->variables().size();
+       variableId++) {
+    if (configuration.underlying[variableId] == true)
+      total += instance->variables()[variableId].weight();
+  }
+  return total;
+}
+
 bool EvaluatedWSatConfig::isSatisfied() const {
   return satisfiedCount == instance->variables().size();
 }

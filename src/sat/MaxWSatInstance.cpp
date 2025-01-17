@@ -13,7 +13,8 @@ bool Term::isPlain() const { return underlying > 0; }
 // ===================== EndTerm =====================
 
 // ===================== Clause =====================
-Clause::Clause(std::vector<Term>&& disjuncts) {
+Clause::Clause(std::vector<Term>&& disjuncts)
+    : disjuncts_(std::move(disjuncts)) {
   std::ranges::sort(disjuncts_, [](const Term& t1, const Term& t2) {
     return t1.id() < t2.id();
   });

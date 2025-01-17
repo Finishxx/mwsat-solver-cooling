@@ -55,7 +55,7 @@ class MaxWSatSolver {
     [[nodiscard]] const std::vector<LiveTerm>& terms() const;
     /** Returns null if Term with given id is not present */
     [[nodiscard]] const LiveTerm* getTerm(uint32_t id) const;
-    [[nodiscard]] const bool isSatisfied() const;
+    [[nodiscard]] bool isSatisfied() const;
 
     /** Does nothing if given variable id, which is not in the clause */
     void setVariable(uint32_t variableId);
@@ -66,13 +66,20 @@ class MaxWSatSolver {
   };
 
   /** Initialized by the Solver */
-  struct LiveVariable {
-    LiveVariable(const Variable* variable, bool isSet);
+  class LiveVariable {
+   private:
+    bool isSet_;
+
+   public:
     const Variable* original;
+    LiveVariable(const Variable* variable, bool isSet);
+    /** Should not be public, but oh well */
     std::vector<LiveClause*> occurrences;
-    bool isSet;
-    [[nodiscard]] uint32_t weight() const;
+    [[nodiscard]] int32_t weight() const;
     [[nodiscard]] uint32_t id() const;
+    [[nodiscard]] bool isSet() const;
+    /** @return change in satisfied clauses */
+    int32_t flip();
   };
 
   /** Indexed by variable id */

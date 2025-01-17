@@ -60,6 +60,7 @@ class Variable {
 /** Immutable Max Weighted SAT instance */
 class MaxWSatInstance {
  private:
+  /** Id is equal to index */
   std::vector<Variable> variables_;
   std::vector<Clause> clauses_;
 
