@@ -27,8 +27,9 @@ class MaxWSatSolver {
   + exportConfig(): EvaluatedWSatConfig
   + instance(): const &MaxWSatInstance
   + flipVariable(variable: uint32_t)
+  + setConfig(config: SatConfig&): void
 }
-MaxWSatSolver "1" *-- MaxWSatInstance
+MaxWSatSolver "1" o-- MaxWSatInstance
 MaxWSatSolver "1" *-- EvaluatedWSatConfig
 MaxWSatSolver "1..N" *-- LiveClause
 MaxWSatSolver "1..N" *-- LiveVariable
@@ -49,7 +50,7 @@ end note
 class LiveClause {
   - satisfiedCount: uint32_t
   - terms: vector<LiveTerm>
-  + getterm(uint32_t id): const LiveTerm *
+  + getTerm(uint32_t id): const LiveTerm *
   -- Mutations --
   + setVariable(uint32_t id): void
   + unsetVariable(uint32_t) id): void
@@ -61,10 +62,12 @@ note bottom of LiveClause
 end note
 
 class LiveVariable {
-  + weight: uint32_t
+  + original: Variable*
   + occurrences: vector<LiveClause*>
+  + weight(): uint32_t
+  + id(): uint32_t
 }
-LiveVariable "1..N" --> LiveTerm
+LiveVariable "1..N" --> LiveClause
 
 class LiveTerm {
   + isSet(): bool
@@ -74,9 +77,9 @@ class LiveTerm {
   + isSet(): bool
   + LiveTerm(Term original, bool isSet)
   -- Mutations --
-  set(): void
-  unset(): void
-  flip(): void
+  + set(): void
+  + unset(): void
+  + flip(): void
 }
 note bottom of LiveTerm
   Maybe give an id too?

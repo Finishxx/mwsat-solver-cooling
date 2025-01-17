@@ -74,8 +74,7 @@ const std::vector<MaxWSatSolver::LiveTerm>& MaxWSatSolver::LiveClause::terms(
 ) const {
   return terms_;
 }
-const MaxWSatSolver::LiveTerm* MaxWSatSolver::LiveClause::getTerm(
-    uint32_t id
+const MaxWSatSolver::LiveTerm* MaxWSatSolver::LiveClause::getTerm(uint32_t id
 ) const {
   std::ranges::borrowed_iterator_t<const std::vector<LiveTerm>&> term =
       std::ranges::lower_bound(terms_, id, std::less{}, &LiveTerm::id);
@@ -123,8 +122,10 @@ void MaxWSatSolver::LiveClause::flipVariable(uint32_t variableId) {
 
 // ===================== LiveVariable =====================
 
-MaxWSatSolver::LiveVariable::LiveVariable(const Variable* variable)
-    : variable(variable) {}
+uint32_t MaxWSatSolver::LiveVariable::weight() const {
+  return original->weight();
+}
+uint32_t MaxWSatSolver::LiveVariable::id() const { return original->id(); }
 
 // ===================== End LiveVariable =====================
 
@@ -144,12 +145,12 @@ void MaxWSatSolver::setConfig(SatConfig& config) {
 
   // Init variables
   for (const Variable& variable : instance_->variables()) {
-    variables.push_back(&variable);
+    variables.emplace_back(&variable);
   }
 
   for (LiveClause& clause : clauses) {
     for (const LiveTerm& term : clause.terms()) {
-      variables[term.id()].clauses.push_back(&clause);
+      variables[term.id()].occurrences.push_back(&clause);
     }
   }
 }

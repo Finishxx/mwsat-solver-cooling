@@ -10,7 +10,6 @@ Term::Term(int32_t underlying) : underlying(underlying) {}
 uint32_t Term::id() const { return std::abs(underlying); }
 bool Term::isNegated() const { return underlying < 0; }
 bool Term::isPlain() const { return underlying > 0; }
-Term Term::flip() const { return Term(-underlying); }
 // ===================== EndTerm =====================
 
 // ===================== Clause =====================

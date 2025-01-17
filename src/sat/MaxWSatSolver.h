@@ -64,13 +64,12 @@ class MaxWSatSolver {
     void flipVariable(uint32_t variableId);
   };
 
-  /** Possible optimization would be to also memorize the LiveTerms */
-  class LiveVariable {
-   public:
-    LiveVariable(const Variable* variable);
-    const Variable* variable;
-    std::vector<LiveClause*> clauses;
+  /** Initialized by the Solver */
+  struct LiveVariable {
+    const Variable* original;
+    std::vector<LiveClause*> occurrences;
     [[nodiscard]] uint32_t weight() const;
+    [[nodiscard]] uint32_t id() const;
   };
 
   /** Indexed by variable id */
