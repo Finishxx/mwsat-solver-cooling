@@ -86,9 +86,31 @@ w 2 4 1 6 0
   std::stringstream ss(example);
   const auto res = parseDimacsFile(ss);
   EXPECT_EQ(res.clauses.size(), 6);
+
   EXPECT_EQ(res.clauses[0].size(), 3);
   auto firstClause = std::vector<int32_t>{1, -3, 4};
   EXPECT_EQ(res.clauses[0], firstClause);
+
+  EXPECT_EQ(res.clauses[1].size(), 3);
+  auto secondClause = std::vector{-1, 2, -3};
+  EXPECT_EQ(res.clauses[1], secondClause);
+
+  EXPECT_EQ(res.clauses[2].size(), 2);
+  auto thirdClause = std::vector{3, 4};
+  EXPECT_EQ(res.clauses[2], thirdClause);
+
+  EXPECT_EQ(res.clauses[3].size(), 4);
+  auto fourthClause = std::vector{1, 2, -3, -4};
+  EXPECT_EQ(res.clauses[3], fourthClause);
+
+  EXPECT_EQ(res.clauses[4].size(), 2);
+  auto fifthClause = std::vector{-2, 3};
+  EXPECT_EQ(res.clauses[4], fifthClause);
+
+  EXPECT_EQ(res.clauses[5].size(), 2);
+  auto sixthClause = std::vector{-3, -4};
+  EXPECT_EQ(res.clauses[5], sixthClause);
+
   EXPECT_EQ(res.weights.size(), 4);
   auto weights = std::vector<int32_t>{2, 4, 1, 6};
   EXPECT_EQ(res.weights, weights);

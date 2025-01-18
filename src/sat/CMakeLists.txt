@@ -1,6 +1,7 @@
 add_library(dimacs_parsing dimacsParsing.cpp dimacsParsing.h)
 
-target_link_libraries(dimacs_parsing PRIVATE fmt::fmt)
+target_link_libraries(dimacs_parsing PUBLIC fmt::fmt)
+target_include_directories(dimacs_parsing PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_library(max_weighted_sat_solver
         MaxWSatSolver.cpp

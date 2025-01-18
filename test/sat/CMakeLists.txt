@@ -1,20 +1,22 @@
-add_executable(dimacs_parsing_test
-        dimacsParsingTest.cpp
-)
+# Parser
+add_executable(dimacs_parsing_test dimacsParsingTest.cpp)
 target_link_libraries(
         dimacs_parsing_test
         dimacs_parsing
         GTest::gtest_main
 )
+gtest_discover_tests(dimacs_parsing_test)
 
+# Solver
 add_executable(
-        sat_test
-        sat_test.cpp
+        solver_test
+        MaxWSatSolverTest.cpp
+        MaxWSatInstance.cpp
 )
 target_link_libraries(
-        sat_test
+        solver_test
+        max_weighted_sat_solver
+        dimacs_parsing
         GTest::gtest_main
 )
-
-
-gtest_discover_tests(sat_test)
+gtest_discover_tests(solver_test)

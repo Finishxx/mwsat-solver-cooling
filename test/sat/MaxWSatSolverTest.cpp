@@ -1,9 +1,11 @@
-
 #include <gtest/gtest.h>
 
 #include <random>
 
-TEST(PageAllocTest, CreateSetsPropertiesCorrectly) {
+#include "MaxWSatSolver.h"
+#include "dimacsParsing.h"
+
+TEST(EvaluatedWSatSolverTest, hello) {
   /*PageAlloc page_alloc = default_page_alloc();
 
   EXPECT_EQ(page_alloc_page_count_get(&page_alloc), PAGE_COUNT);
