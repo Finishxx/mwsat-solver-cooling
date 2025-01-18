@@ -82,12 +82,17 @@ class MaxWSatSolver {
     int32_t flip();
   };
 
-  /** Indexed by variable id */
+  /** Indexed by variable's id, but 0th element is dummy */
   std::vector<LiveVariable> variables;
   std::vector<LiveClause> clauses;
 
   MaxWSatInstance* instance_;
   EvaluatedWSatConfig config_;
+
+  [[nodiscard]] const LiveVariable& variableById(uint32_t variableId) const;
+  LiveVariable& variableById(uint32_t variableId);
+  /** For iteration, because does not include the dummy 0th element */
+  std::ranges::subrange<std::vector<LiveVariable>::iterator> legalVariables();
 
  public:
   /** Calculates new configuration by modifying previous configuration */

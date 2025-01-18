@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <ranges>
 
 // ===================== LiveTerm =====================
 
@@ -152,6 +153,19 @@ int32_t MaxWSatSolver::LiveVariable::flip() {
 
 // ===================== MaxWSatSolver =====================
 
+const MaxWSatSolver::LiveVariable& MaxWSatSolver::variableById(
+    uint32_t variableId
+) const {
+  return variables[variableId - 1];
+}
+MaxWSatSolver::LiveVariable& MaxWSatSolver::variableById(uint32_t variableId) {
+  return variables[variableId - 1];
+}
+
+std::ranges::subrange<std::vector<MaxWSatSolver::LiveVariable>::iterator>
+MaxWSatSolver::legalVariables() {
+  return std::ranges::subrange{variables.begin(), variables.end()};
+}
 void MaxWSatSolver::flipVariable(uint32_t variableId) {
   LiveVariable& variable = variables[variableId];
   const bool wasSet = variable.isSet();

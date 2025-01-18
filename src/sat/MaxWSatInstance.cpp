@@ -51,7 +51,7 @@ bool Clause::containsVariable(uint32_t variableId) const {
 uint32_t Variable::id() const { return id_; }
 int32_t Variable::weight() const { return weight_; }
 const std::vector<const Clause*>& Variable::occurences() const {
-  return occurences_;
+  return occurrences_;
 }
 
 Variable::Variable(
@@ -59,7 +59,7 @@ Variable::Variable(
 )
     : id_(id), weight_(weight) {
   for (const Clause& clause : allClauses) {
-    if (clause.containsVariable(id)) occurences_.push_back(&clause);
+    if (clause.containsVariable(id)) occurrences_.push_back(&clause);
   }
 }
 // ===================== EndVariable =====================
@@ -93,7 +93,8 @@ MaxWSatInstance::MaxWSatInstance(
   // Weights: Seq<int32_t> => Seq<Variable>
   variables_.reserve(weights.size());
   for (uint32_t i = 0; i < weights.size(); i++) {
-    variables_.emplace_back(i, weights.at(i), clauses_);
+    // Ids are + 1, because id starts at 1, not 0
+    variables_.emplace_back(i + 1, weights.at(i), clauses_);
   }
 }
 bool MaxWSatInstance::isSatisfiable() const {

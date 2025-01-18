@@ -1,5 +1,6 @@
 #ifndef MAXWSATINSTANCE_H
 #define MAXWSATINSTANCE_H
+#include <algorithm>
 #include <cstdint>
 #include <vector>
 
@@ -42,7 +43,7 @@ class Variable {
  private:
   uint32_t id_;
   int32_t weight_;
-  std::vector<const Clause*> occurences_;
+  std::vector<const Clause*> occurrences_;
 
  public:
   [[nodiscard]] uint32_t id() const;
@@ -60,7 +61,7 @@ class Variable {
 /** Immutable Max Weighted SAT instance */
 class MaxWSatInstance {
  private:
-  /** Id is equal to index */
+  /** Not indexable by variable id */
   std::vector<Variable> variables_;
   std::vector<Clause> clauses_;
 
