@@ -1,4 +1,4 @@
-#include "MaxWSatInstance.h"
+#include "WSatInstance.h"
 
 #include <assert.h>
 
@@ -66,13 +66,13 @@ Variable::Variable(
 
 // ===================== Instance =====================
 
-const std::vector<Variable>& MaxWSatInstance::variables() const {
+const std::vector<Variable>& WSatInstance::variables() const {
   return variables_;
 }
-const std::vector<Clause>& MaxWSatInstance::clauses() const { return clauses_; }
+const std::vector<Clause>& WSatInstance::clauses() const { return clauses_; }
 
 // This work could be extracted into smaller functions for reuse
-MaxWSatInstance::MaxWSatInstance(
+WSatInstance::WSatInstance(
     std::vector<std::vector<int32_t>>& clauses, std::vector<int32_t>& weights
 ) {
   assert(!clauses.empty());
@@ -97,7 +97,7 @@ MaxWSatInstance::MaxWSatInstance(
     variables_.emplace_back(i + 1, weights.at(i), clauses_);
   }
 }
-bool MaxWSatInstance::isSatisfiable() const {
+bool WSatInstance::isSatisfiable() const {
   return std::ranges::all_of(clauses_, [](const Clause& clause) {
     return clause.isSatisfiable();
   });

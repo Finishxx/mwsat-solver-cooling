@@ -2,11 +2,11 @@
 
 #include <random>
 
-#include "MaxWSatSolver.h"
+#include "WSatInstance.h"
 #include "dimacsParsing.h"
 
 void testTerm(
-    MaxWSatInstance& instance,
+    WSatInstance& instance,
     uint32_t clauseIndex,
     uint32_t termIndex,
     uint32_t id,
@@ -32,7 +32,7 @@ w 2 4 1 6 0
 -3 -4 0)";
   std::stringstream ss(example);
   ParsedDimacsFile res = parseDimacsFile(ss);
-  MaxWSatInstance instance = MaxWSatInstance(res.clauses, res.weights);
+  WSatInstance instance = WSatInstance(res.clauses, res.weights);
 
   // Test clauses
   EXPECT_EQ(instance.clauses().size(), 6);

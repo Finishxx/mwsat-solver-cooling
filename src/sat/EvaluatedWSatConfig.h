@@ -2,14 +2,14 @@
 #define EVALUATEDWSATCONFIG_H
 #include <cstdint>
 
-#include "MaxWSatInstance.h"
 #include "SatConfig.h"
+#include "WSatInstance.h"
 
 struct EvaluatedWSatConfig {
   EvaluatedWSatConfig() = default;
   /** Calculates the initial weight itself */
   EvaluatedWSatConfig(
-      MaxWSatInstance& instance,
+      WSatInstance& instance,
       SatConfig&& configuration,
       uint32_t satisfied_count
   );
@@ -17,7 +17,7 @@ struct EvaluatedWSatConfig {
   /** Calculates weight based on  */
   [[nodiscard]] int32_t calculateWeight() const;
 
-  MaxWSatInstance* instance;
+  WSatInstance* instance;
   SatConfig configuration;
   int32_t weight;
   [[nodiscard]] bool isSatisfied() const;

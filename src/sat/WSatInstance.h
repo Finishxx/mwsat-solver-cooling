@@ -59,7 +59,7 @@ class Variable {
 };
 
 /** Immutable Max Weighted SAT instance */
-class MaxWSatInstance {
+class WSatInstance {
  private:
   /** Not indexable by variable id */
   std::vector<Variable> variables_;
@@ -68,7 +68,7 @@ class MaxWSatInstance {
  public:
   [[nodiscard]] const std::vector<Variable>& variables() const;
   [[nodiscard]] const std::vector<Clause>& clauses() const;
-  MaxWSatInstance(
+  WSatInstance(
       std::vector<std::vector<int32_t>>& clauses, std::vector<int32_t>& weights
   );
   /** Slow, because it calls isSatisfiable() on all clauses */

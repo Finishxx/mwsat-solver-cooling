@@ -2,14 +2,14 @@
 #define SATCONFIG_H
 #include <vector>
 
-#include "MaxWSatInstance.h"
+#include "WSatInstance.h"
 
 /** Mutable */
 struct SatConfig {
-  MaxWSatInstance* instance;
+  WSatInstance* instance;
   std::vector<bool> underlying;
   SatConfig() = default;
-  SatConfig(MaxWSatInstance* instance, std::vector<bool>&& underlying);
+  SatConfig(WSatInstance* instance, std::vector<bool>&& underlying);
 };
 
 #endif  // SATCONFIG_H

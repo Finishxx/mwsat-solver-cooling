@@ -1,7 +1,7 @@
 #include "EvaluatedWSatConfig.h"
 
 EvaluatedWSatConfig::EvaluatedWSatConfig(
-    MaxWSatInstance& instance,
+    WSatInstance& instance,
     SatConfig&& configuration,
     uint32_t satisfied_count
 )

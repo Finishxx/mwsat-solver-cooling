@@ -1,4 +1,4 @@
-#include "MaxWSatSolver.h"
+#include "WSatSolver.h"
 
 #include <algorithm>
 #include <cassert>
@@ -6,10 +6,10 @@
 
 // ===================== LiveTerm =====================
 
-bool MaxWSatSolver::LiveTerm::operator<(const LiveTerm& other) const {
+bool WSatSolver::LiveTerm::operator<(const LiveTerm& other) const {
   return this->id() < other.id();
 }
-MaxWSatSolver::LiveTerm::LiveTerm(Term original, bool isSet)
+WSatSolver::LiveTerm::LiveTerm(Term original, bool isSet)
     : isSet_(isSet), original(original) {
   if ((isSet && original.isPlain()) || (!isSet && original.isNegated())) {
     isSatisfied_ = true;
@@ -17,12 +17,12 @@ MaxWSatSolver::LiveTerm::LiveTerm(Term original, bool isSet)
     isSatisfied_ = false;
   }
 }
-const Term& MaxWSatSolver::LiveTerm::originalTerm() const { return original; }
-uint32_t MaxWSatSolver::LiveTerm::id() const { return original.id(); }
-bool MaxWSatSolver::LiveTerm::isSatisfied() const { return isSatisfied_; }
-bool MaxWSatSolver::LiveTerm::isSet() const { return isSet_; }
-bool MaxWSatSolver::LiveTerm::isUnset() const { return !isSet_; }
-void MaxWSatSolver::LiveTerm::set() {
+const Term& WSatSolver::LiveTerm::originalTerm() const { return original; }
+uint32_t WSatSolver::LiveTerm::id() const { return original.id(); }
+bool WSatSolver::LiveTerm::isSatisfied() const { return isSatisfied_; }
+bool WSatSolver::LiveTerm::isSet() const { return isSet_; }
+bool WSatSolver::LiveTerm::isUnset() const { return !isSet_; }
+void WSatSolver::LiveTerm::set() {
   if (!isSet_) {
     isSet_ = true;
     // Satisfied if set and the original was plain
@@ -30,7 +30,7 @@ void MaxWSatSolver::LiveTerm::set() {
   }
 }
 
-void MaxWSatSolver::LiveTerm::unset() {
+void WSatSolver::LiveTerm::unset() {
   if (isSet_) {
     isSet_ = false;
     // Satisfied if unset and the original was negated
@@ -38,7 +38,7 @@ void MaxWSatSolver::LiveTerm::unset() {
   }
 }
 
-void MaxWSatSolver::LiveTerm::flip() {
+void WSatSolver::LiveTerm::flip() {
   isSet_ = !isSet_;
   isSatisfied_ = !isSatisfied_;
 }
@@ -47,7 +47,7 @@ void MaxWSatSolver::LiveTerm::flip() {
 // ===================== LiveTerm =====================
 
 // Redundancy with const findTerm
-MaxWSatSolver::LiveTerm* MaxWSatSolver::LiveClause::findTerm(uint32_t termId) {
+WSatSolver::LiveTerm* WSatSolver::LiveClause::findTerm(uint32_t termId) {
   auto term =
       std::ranges::lower_bound(terms_, termId, std::less{}, &LiveTerm::id);
 
@@ -56,7 +56,7 @@ MaxWSatSolver::LiveTerm* MaxWSatSolver::LiveClause::findTerm(uint32_t termId) {
   }
   return &(*term);
 }
-MaxWSatSolver::LiveClause::LiveClause(const Clause* clause, SatConfig& config)
+WSatSolver::LiveClause::LiveClause(const Clause* clause, SatConfig& config)
     : original(clause), satisfiedCount(0) {
   terms_.reserve(clause->disjuncts().size());
   for (const auto& term : clause->disjuncts()) {
@@ -68,15 +68,13 @@ MaxWSatSolver::LiveClause::LiveClause(const Clause* clause, SatConfig& config)
   }
 }
 
-const Clause& MaxWSatSolver::LiveClause::originalClause() const {
+const Clause& WSatSolver::LiveClause::originalClause() const {
   return *original;
 }
-const std::vector<MaxWSatSolver::LiveTerm>& MaxWSatSolver::LiveClause::terms(
-) const {
+const std::vector<WSatSolver::LiveTerm>& WSatSolver::LiveClause::terms() const {
   return terms_;
 }
-const MaxWSatSolver::LiveTerm* MaxWSatSolver::LiveClause::getTerm(uint32_t id
-) const {
+const WSatSolver::LiveTerm* WSatSolver::LiveClause::getTerm(uint32_t id) const {
   std::ranges::borrowed_iterator_t<const std::vector<LiveTerm>&> term =
       std::ranges::lower_bound(terms_, id, std::less{}, &LiveTerm::id);
 
@@ -85,10 +83,8 @@ const MaxWSatSolver::LiveTerm* MaxWSatSolver::LiveClause::getTerm(uint32_t id
   }
   return &(*term);
 }
-bool MaxWSatSolver::LiveClause::isSatisfied() const {
-  return satisfiedCount > 0;
-}
-void MaxWSatSolver::LiveClause::setVariable(uint32_t variableId) {
+bool WSatSolver::LiveClause::isSatisfied() const { return satisfiedCount > 0; }
+void WSatSolver::LiveClause::setVariable(uint32_t variableId) {
   LiveTerm* term = findTerm(variableId);
   if (term == nullptr || term->isSet()) return;
 
@@ -99,7 +95,7 @@ void MaxWSatSolver::LiveClause::setVariable(uint32_t variableId) {
     satisfiedCount -= 1;
   }
 }
-void MaxWSatSolver::LiveClause::unsetVariable(uint32_t variableId) {
+void WSatSolver::LiveClause::unsetVariable(uint32_t variableId) {
   LiveTerm* term = findTerm(variableId);
   if (term == nullptr || term->isUnset()) return;
 
@@ -110,7 +106,7 @@ void MaxWSatSolver::LiveClause::unsetVariable(uint32_t variableId) {
     satisfiedCount -= 1;
   }
 }
-void MaxWSatSolver::LiveClause::flipVariable(uint32_t variableId) {
+void WSatSolver::LiveClause::flipVariable(uint32_t variableId) {
   LiveTerm* term = findTerm(variableId);
   if (term == nullptr) return;
 
@@ -121,20 +117,18 @@ void MaxWSatSolver::LiveClause::flipVariable(uint32_t variableId) {
     satisfiedCount -= 1;
   }
 }
-MaxWSatSolver::LiveVariable::LiveVariable(const Variable* variable, bool isSet)
+WSatSolver::LiveVariable::LiveVariable(const Variable* variable, bool isSet)
     : original(variable), isSet_(isSet) {}
 
 // ===================== End LiveClause =====================
 
 // ===================== LiveVariable =====================
 
-int32_t MaxWSatSolver::LiveVariable::weight() const {
-  return original->weight();
-}
-uint32_t MaxWSatSolver::LiveVariable::id() const { return original->id(); }
-bool MaxWSatSolver::LiveVariable::isSet() const { return isSet_; }
+int32_t WSatSolver::LiveVariable::weight() const { return original->weight(); }
+uint32_t WSatSolver::LiveVariable::id() const { return original->id(); }
+bool WSatSolver::LiveVariable::isSet() const { return isSet_; }
 
-int32_t MaxWSatSolver::LiveVariable::flip() {
+int32_t WSatSolver::LiveVariable::flip() {
   int32_t satisfiabilityChange = 0;
   for (LiveClause* clause : occurrences) {
     assert(clause->getTerm(id()) != nullptr);
@@ -153,21 +147,24 @@ int32_t MaxWSatSolver::LiveVariable::flip() {
 
 // ===================== MaxWSatSolver =====================
 
-const MaxWSatSolver::LiveVariable& MaxWSatSolver::variableById(
-    uint32_t variableId
+const WSatSolver::LiveVariable& WSatSolver::variableById(uint32_t variableId
 ) const {
+  assert(variableId != 0);
+  assert(variableId <= variables.size());
   return variables[variableId - 1];
 }
-MaxWSatSolver::LiveVariable& MaxWSatSolver::variableById(uint32_t variableId) {
+WSatSolver::LiveVariable& WSatSolver::variableById(uint32_t variableId) {
+  assert(variableId != 0);
+  assert(variableId <= variables.size());
   return variables[variableId - 1];
 }
 
-std::ranges::subrange<std::vector<MaxWSatSolver::LiveVariable>::iterator>
-MaxWSatSolver::legalVariables() {
+std::ranges::subrange<std::vector<WSatSolver::LiveVariable>::iterator>
+WSatSolver::legalVariables() {
   return std::ranges::subrange{variables.begin(), variables.end()};
 }
-void MaxWSatSolver::flipVariable(uint32_t variableId) {
-  LiveVariable& variable = variables[variableId];
+void WSatSolver::flipVariable(uint32_t variableId) {
+  LiveVariable& variable = variableById(variableId);
   const bool wasSet = variable.isSet();
 
   int32_t satisfiedCountChange = variable.flip();
@@ -180,7 +177,7 @@ void MaxWSatSolver::flipVariable(uint32_t variableId) {
   assert(config_.weight == config_.calculateWeight());
 }
 
-void MaxWSatSolver::setConfig(SatConfig& config) {
+void WSatSolver::setConfig(SatConfig& config) {
   assert(config.underlying.size() == instance_->variables().size());
   // Clear previous context                      n
   variables.clear();
@@ -193,7 +190,10 @@ void MaxWSatSolver::setConfig(SatConfig& config) {
   }
 
   // Init variables
-  variables.reserve(instance_->variables().size());
+  // More space for dummy element
+  variables.reserve(instance_->variables().size() + 1);
+  // Insert dummy element
+  variables.emplace_back(nullptr, false);
   for (const Variable& variable : instance_->variables()) {
     variables.emplace_back(&variable, config.underlying[variable.id()]);
   }
@@ -201,7 +201,7 @@ void MaxWSatSolver::setConfig(SatConfig& config) {
   // Add variable's occurrences
   for (LiveClause& clause : clauses) {
     for (const LiveTerm& term : clause.terms()) {
-      variables[term.id()].occurrences.push_back(&clause);
+      variableById(term.id()).occurrences.push_back(&clause);
     }
   }
 
@@ -212,21 +212,19 @@ void MaxWSatSolver::setConfig(SatConfig& config) {
   config_ = EvaluatedWSatConfig(*instance_, std::move(config), satisfiedCount);
 }
 
-MaxWSatSolver::MaxWSatSolver(
-    MaxWSatInstance& instance, SatConfig& initialConfig
-)
+WSatSolver::WSatSolver(WSatInstance& instance, SatConfig& initialConfig)
     : instance_(&instance) {
   setConfig(initialConfig);
 }
 
-const EvaluatedWSatConfig& MaxWSatSolver::currentConfiguration() const {
+const EvaluatedWSatConfig& WSatSolver::currentConfiguration() const {
   return config_;
 }
 
-EvaluatedWSatConfig MaxWSatSolver::exportConfiguration() const {
+EvaluatedWSatConfig WSatSolver::exportConfiguration() const {
   return EvaluatedWSatConfig(config_);
 }
 
-const MaxWSatInstance& MaxWSatSolver::instance() const { return *instance_; }
+const WSatInstance& WSatSolver::instance() const { return *instance_; }
 
 // ===================== End MaxWSatSolver =====================

@@ -4,8 +4,8 @@
 #include <vector>
 
 #include "EvaluatedWSatConfig.h"
-#include "MaxWSatInstance.h"
 #include "SatConfig.h"
+#include "WSatInstance.h"
 
 /**
  * Max Weighted Sat Solver with fast `flipVariable()` method achieved by
@@ -16,7 +16,7 @@
  * Expects the given instance to be satisfiable and to not contain duplicates
  * inside clauses e.g. (1 2 3 1).
  */
-class MaxWSatSolver {
+class WSatSolver {
  private:
   class LiveTerm {
    private:
@@ -86,7 +86,7 @@ class MaxWSatSolver {
   std::vector<LiveVariable> variables;
   std::vector<LiveClause> clauses;
 
-  MaxWSatInstance* instance_;
+  WSatInstance* instance_;
   EvaluatedWSatConfig config_;
 
   [[nodiscard]] const LiveVariable& variableById(uint32_t variableId) const;
@@ -100,12 +100,12 @@ class MaxWSatSolver {
   /** Calculates new configuration given specific SatConfig. Can be slow. */
   void setConfig(SatConfig& config);
 
-  MaxWSatSolver(MaxWSatInstance& instance, SatConfig& initialConfig);
+  WSatSolver(WSatInstance& instance, SatConfig& initialConfig);
 
   [[nodiscard]] const EvaluatedWSatConfig& currentConfiguration() const;
   /** Creates copy of currentConfiguration */
   EvaluatedWSatConfig exportConfiguration() const;
-  const MaxWSatInstance& instance() const;
+  const WSatInstance& instance() const;
 };
 
 #endif  // MAXWSATSOLVER_H
