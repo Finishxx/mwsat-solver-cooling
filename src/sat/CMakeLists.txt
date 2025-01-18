@@ -4,10 +4,10 @@ target_link_libraries(dimacs_parsing PUBLIC fmt::fmt)
 target_include_directories(dimacs_parsing PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_library(max_weighted_sat_solver
-        MaxWSatSolver.cpp
-        MaxWSatSolver.h
-        MaxWSatInstance.cpp
-        MaxWSatInstance.h
+        WSatSolver.cpp
+        WSatSolver.h
+        WSatInstance.cpp
+        WSatInstance.h
         SatConfig.h
         SatConfig.cpp
         EvaluatedWSatConfig.cpp

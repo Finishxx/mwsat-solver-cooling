@@ -56,6 +56,7 @@ class WSatSolver {
     /** Returns null if Term with given id is not present */
     [[nodiscard]] const LiveTerm* getTerm(uint32_t id) const;
     [[nodiscard]] bool isSatisfied() const;
+    [[nodiscard]] bool getSatisfiedCount() const;
 
     /** Does nothing if given variable id, which is not in the clause */
     void setVariable(uint32_t variableId);
@@ -93,6 +94,8 @@ class WSatSolver {
   LiveVariable& variableById(uint32_t variableId);
   /** For iteration, because does not include the dummy 0th element */
   std::ranges::subrange<std::vector<LiveVariable>::iterator> legalVariables();
+  std::ranges::subrange<std::vector<LiveVariable>::const_iterator>
+  legalVariables() const;
 
  public:
   /** Calculates new configuration by modifying previous configuration */
@@ -104,8 +107,10 @@ class WSatSolver {
 
   [[nodiscard]] const EvaluatedWSatConfig& currentConfiguration() const;
   /** Creates copy of currentConfiguration */
-  EvaluatedWSatConfig exportConfiguration() const;
-  const WSatInstance& instance() const;
+  [[nodiscard]] EvaluatedWSatConfig exportConfiguration() const;
+  [[nodiscard]] const WSatInstance& instance() const;
+
+  void printOut() const;
 };
 
 #endif  // MAXWSATSOLVER_H

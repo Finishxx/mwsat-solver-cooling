@@ -10,8 +10,8 @@ gtest_discover_tests(dimacs_parsing_test)
 # Solver
 add_executable(
         solver_test
-        MaxWSatSolverTest.cpp
-        MaxWSatInstanceTest.cpp
+        WSatSolverTest.cpp
+        WSatInstanceTest.cpp
 )
 target_link_libraries(
         solver_test

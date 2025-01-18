@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <iostream>
 #include <ranges>
 
 // ===================== LiveTerm =====================
@@ -60,7 +61,7 @@ WSatSolver::LiveClause::LiveClause(const Clause* clause, SatConfig& config)
     : original(clause), satisfiedCount(0) {
   terms_.reserve(clause->disjuncts().size());
   for (const auto& term : clause->disjuncts()) {
-    LiveTerm& ref = terms_.emplace_back(term, config.underlying[term.id()]);
+    LiveTerm& ref = terms_.emplace_back(term, config.byId(term.id()));
     if (ref.isSatisfied()) satisfiedCount += 1;
   }
   if (!std::ranges::is_sorted(terms_, std::less<>{}, &LiveTerm::id)) {
@@ -84,6 +85,9 @@ const WSatSolver::LiveTerm* WSatSolver::LiveClause::getTerm(uint32_t id) const {
   return &(*term);
 }
 bool WSatSolver::LiveClause::isSatisfied() const { return satisfiedCount > 0; }
+bool WSatSolver::LiveClause::getSatisfiedCount() const {
+  return satisfiedCount;
+}
 void WSatSolver::LiveClause::setVariable(uint32_t variableId) {
   LiveTerm* term = findTerm(variableId);
   if (term == nullptr || term->isSet()) return;
@@ -140,6 +144,7 @@ int32_t WSatSolver::LiveVariable::flip() {
     if (wasSatisfied && !satisfiedNow) satisfiabilityChange -= 1;
     if (!wasSatisfied && satisfiedNow) satisfiabilityChange += 1;
   }
+  isSet_ = !isSet_;
   return satisfiabilityChange;
 }
 
@@ -151,17 +156,21 @@ const WSatSolver::LiveVariable& WSatSolver::variableById(uint32_t variableId
 ) const {
   assert(variableId != 0);
   assert(variableId <= variables.size());
-  return variables[variableId - 1];
+  return variables[variableId];
 }
 WSatSolver::LiveVariable& WSatSolver::variableById(uint32_t variableId) {
   assert(variableId != 0);
   assert(variableId <= variables.size());
-  return variables[variableId - 1];
+  return variables[variableId];
 }
 
 std::ranges::subrange<std::vector<WSatSolver::LiveVariable>::iterator>
 WSatSolver::legalVariables() {
-  return std::ranges::subrange{variables.begin(), variables.end()};
+  return std::ranges::subrange{variables.begin() + 1, variables.end()};
+}
+std::ranges::subrange<std::vector<WSatSolver::LiveVariable>::const_iterator>
+WSatSolver::legalVariables() const {
+  return std::ranges::subrange{variables.begin() + 1, variables.end()};
 }
 void WSatSolver::flipVariable(uint32_t variableId) {
   LiveVariable& variable = variableById(variableId);
@@ -169,24 +178,26 @@ void WSatSolver::flipVariable(uint32_t variableId) {
 
   int32_t satisfiedCountChange = variable.flip();
   config_.satisfiedCount += satisfiedCountChange;
+  config_.configuration.byId(variableId) = variable.isSet();
 
   if (wasSet)
     config_.weight -= variable.weight();
   else
     config_.weight += variable.weight();
+
   assert(config_.weight == config_.calculateWeight());
 }
 
 void WSatSolver::setConfig(SatConfig& config) {
   assert(config.underlying.size() == instance_->variables().size());
-  // Clear previous context                      n
+  // Clear previous context
   variables.clear();
   clauses.clear();
 
   // Init clauses
   clauses.reserve(instance_->clauses().size());
   for (const Clause& clause : instance_->clauses()) {
-    LiveClause(&clause, config);
+    clauses.emplace_back(&clause, config);
   }
 
   // Init variables
@@ -195,7 +206,7 @@ void WSatSolver::setConfig(SatConfig& config) {
   // Insert dummy element
   variables.emplace_back(nullptr, false);
   for (const Variable& variable : instance_->variables()) {
-    variables.emplace_back(&variable, config.underlying[variable.id()]);
+    variables.emplace_back(&variable, config.byId(variable.id()));
   }
 
   // Add variable's occurrences
@@ -226,5 +237,37 @@ EvaluatedWSatConfig WSatSolver::exportConfiguration() const {
 }
 
 const WSatInstance& WSatSolver::instance() const { return *instance_; }
+void WSatSolver::printOut() const {
+  std::cout << "Printing WSatSolver" << std::endl;
 
+  std::cout << "-----" << std::endl;
+  std::cout << "Clauses:" << std::endl;
+  std::cout << "- size: " << clauses.size() << std::endl;
+  std::cout << "-----" << std::endl;
+  for (const LiveClause& clause : clauses) {
+    if (clause.isSatisfied())
+      std::cout << "S{" << clause.getSatisfiedCount() << "}";
+    else
+      std::cout << "U";
+    std::cout << std::endl;
+    for (const LiveTerm& term : clause.terms()) {
+      std::cout << "[id: " << term.id() << ", set:" << term.isSet()
+                << ", satisfied:" << term.isSatisfied()
+                << ", originalIsPlain:" << term.originalTerm().isPlain()
+                << "] ";
+    }
+    std::cout << std::endl;
+  }
+
+  std::cout << "-----" << std::endl;
+  std::cout << "Variables:" << std::endl;
+  std::cout << "- size: " << variables.size() - 1 << std::endl;
+  std::cout << "-----" << std::endl;
+
+  for (const LiveVariable& variable : legalVariables()) {
+    std::cout << variable.id()
+              << " has occurrences: " << variable.occurrences.size()
+              << std::endl;
+  }
+}
 // ===================== End MaxWSatSolver =====================
