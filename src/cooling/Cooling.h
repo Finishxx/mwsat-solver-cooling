@@ -14,10 +14,12 @@ struct CoolingSchedule {
   ///@}
 
   /// @name Stop control
+  ///@{
   double stopTemperature;
   uint32_t stopAfterTotalSteps;
   uint32_t stopAfterNoChange;
   uint32_t stopAfterNoBetterment;
+  ///@}
 
   CoolingSchedule(
       uint32_t equilibrium,
@@ -27,14 +29,7 @@ struct CoolingSchedule {
       uint32_t stopAfterTotalSteps,
       uint32_t stopAfterNoChange,
       uint32_t stopAfterNoBetterment
-  )
-      : startTemperature(startTemperature),
-        coolingFactor(coolingFactor),
-        equilibrium(equilibrium),
-        stopTemperature(stopTemperature),
-        stopAfterTotalSteps(stopAfterTotalSteps),
-        stopAfterNoChange(stopAfterNoChange),
-        stopAfterNoBetterment(stopAfterNoBetterment) {}
+  );
 };
 /**
  * Generic simulated cooling solver
@@ -54,38 +49,37 @@ struct CoolingSchedule {
  */
 class Criteria {
  public:
-  bool operator==(const Criteria& other) const;
+  Criteria(const Criteria& other);
   bool operator<(const Criteria& other) const;
-  bool operator>(const Criteria& other) const;
-  bool operator>=(const Criteria& other) const;
-  bool operator<=(const Criteria& other) const;
-  double howMuchBetterThan(const Criteria& other) const;
-  double howMuchWorseThan(const Criteria& other) const;
+  [[nodiscard]] double howMuchBetterThan(const Criteria& other) const;
+  [[nodiscard]] double howMuchWorseThan(const Criteria& other) const;
 };
 class Configuration {
  public:
+  Configuration(const Configuration& other);
   bool operator==(const Configuration& other) const;
   bool operator!=(const Configuration& other) const;
 };
 class Problem {
-  Configuration getRandomConfiguration();
-  Configuration getRandomNeighbor(const Configuration& configuration);
-  Criteria evaluateConfiguration(const Configuration& configuration);
-  void applyConfiguration(const Configuration& configuration);
+  Configuration currentConfiguration() const;
+  Configuration getRandomConfiguration() const;
+  Configuration getRandomNeighbor(const Configuration& configuration) const;
+  Criteria evaluateConfiguration(const Configuration& configuration) const;
 };
 
 template <typename T>
 concept Configurable = std::equality_comparable && std::copy_constructible;
 
 template <typename T>
-concept Criteriable = std::copy_constructible<T> && std::totally_ordered<T> &&
-    requires(T t1, T t2) {
-      { t1.howMuchWorseThan(t2) } -> std::convertible_to<double>;
-      { t1.howMuchBetterThan(t2) } -> std::convertible_to<double>;
-    };
+concept Criteriable = std::copy_constructible<T> && requires(T t1, T t2) {
+  { t1 < t2 };
+  { t1.howMuchWorseThan(t2) } -> std::convertible_to<double>;
+  { t1.howMuchBetterThan(t2) } -> std::convertible_to<double>;
+};
 
 template <typename T, typename Configuration, typename Criteria>
 concept Problemable = requires(T t, Configuration configuration) {
+  { t.currentConfiguration() } -> std::convertible_to<Configuration>;
   { t.getRandomConfiguration() } -> std::convertible_to<Configuration>;
   { t.getRandomNeighbor(configuration) } -> std::convertible_to<Configuration>;
   { t.evaluateConfiguration(configuration) } -> std::convertible_to<Criteria>;

@@ -23,7 +23,7 @@ w 2 4 1 6 0
   WSatInstance instance = WSatInstance(res.clauses, res.weights);
   std::vector<bool> init;
   init.resize(instance.variables().size(), false);
-  SatConfig config = SatConfig(&instance, std::move(init));
+  SatConfig config = SatConfig(std::move(init));
   WSatSolver solver = WSatSolver(instance, config);
 
   // Config is copied and instance is the same
@@ -59,12 +59,12 @@ w 2 4 1 6 0
   WSatInstance instance = WSatInstance(res.clauses, res.weights);
   std::vector<bool> init;
   init.resize(instance.variables().size(), false);
-  SatConfig config = SatConfig(&instance, std::move(init));
+  SatConfig config = SatConfig(std::move(init));
   WSatSolver solver = WSatSolver(instance, config);
 
   std::vector<bool> newInit;
   newInit.resize(instance.variables().size(), true);
-  SatConfig newConfig = SatConfig(&instance, std::move(newInit));
+  SatConfig newConfig = SatConfig(std::move(newInit));
   solver.setConfig(newConfig);
 
   // Config is copied and instance is the same
@@ -100,7 +100,7 @@ w 2 4 1 6 0
   WSatInstance instance = WSatInstance(res.clauses, res.weights);
   std::vector<bool> init;
   init.resize(instance.variables().size(), false);
-  SatConfig config = SatConfig(&instance, std::move(init));
+  SatConfig config = SatConfig(std::move(init));
   WSatSolver solver = WSatSolver(instance, config);
 
   solver.flipVariable(4);

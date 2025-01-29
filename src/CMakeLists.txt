@@ -9,7 +9,8 @@ target_link_libraries(
 )
 
 
-add_executable(main main.cpp)
+add_executable(main main.cpp
+)
 
 # CLI11
 include(FetchContent)

@@ -7,7 +7,7 @@
 /** Facade for xoshiro256plus generator */
 class Rng {
  public:
-  std::array<uint64_t, 4> getState() const;
+  static std::array<uint64_t, 4> getState();
 
   static uint64_t next();
   static double nextDouble();
