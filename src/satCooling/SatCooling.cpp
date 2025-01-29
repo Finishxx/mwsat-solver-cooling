@@ -46,10 +46,6 @@ double SatCriteria::howMuchWorseThan(const SatCriteria& other) const {
 
 // SatCooling
 SatConfig SatCooling::getRandomConfiguration() const {
-  Cooling<Configuration, Criteria, Problem> cooling =
-      Cooling<Configuration, Criteria, Problem>(
-          Problem(), Configuration(), CoolingSchedule(1, 1, 1, 1, 1, 1, 1)
-      );
   Rng::next();
   std::vector<bool> bools;
   bools.resize(instance.variables().size());
