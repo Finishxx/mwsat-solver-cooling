@@ -38,15 +38,18 @@ double SatCriteria::howMuchWorseThan(const SatCriteria& other) const {
   }
 
   // We are not satisfied, but he is => penalize ourselves
-  if (not this->isSatisfied() && other.isSatisfied()) {
-    double satisfiedRatio =
-        static_cast<double>(this->satisfiedCount) / instance->clauses().size();
-    return other.weights - (this->weights * (satisfiedRatio * satisfiedRatio));
-  }
+  // if (not this->isSatisfied() && other.isSatisfied()) {
+  double satisfiedRatio =
+      static_cast<double>(this->satisfiedCount) / instance->clauses().size();
+  return other.weights - (this->weights * (satisfiedRatio * satisfiedRatio));
 }
 
 // SatCooling
 SatConfig SatCooling::getRandomConfiguration() const {
+  Cooling<Configuration, Criteria, Problem> cooling =
+      Cooling<Configuration, Criteria, Problem>(
+          Problem(), Configuration(), CoolingSchedule(1, 1, 1, 1, 1, 1, 1)
+      );
   Rng::next();
   std::vector<bool> bools;
   bools.resize(instance.variables().size());
@@ -66,8 +69,8 @@ SatConfig SatCooling::getRandomNeighbor(const SatConfig& configuration) const {
 SatCriteria SatCooling::evaluateConfiguration(const SatConfig& configuration
 ) const {
   uint32_t satisfiedClauses = 0;
-  for (const Clause clause& : instance.clauses) {
-    for (const Term disjunct& : clause.disjuncts()) {
+  for (const Clause& clause : instance.clauses()) {
+    for (const Term& disjunct : clause.disjuncts()) {
       bool isSet = configuration.byId(disjunct.id());
       if ((disjunct.isPlain() && isSet) or (disjunct.isNegated() && !isSet)) {
         satisfiedClauses += 1;

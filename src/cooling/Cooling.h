@@ -40,19 +40,22 @@ struct CoolingSchedule {
  */
 class Criteria {
  public:
+  Criteria();
   Criteria(const Criteria& other);
   [[nodiscard]] bool isValid() const;
   bool operator<(const Criteria& other) const;
+  bool operator>=(const Criteria& other) const;
   [[nodiscard]] double howMuchWorseThan(const Criteria& other) const;
 };
 class Configuration {
  public:
+  Configuration();
   Configuration(const Configuration& other);
   bool operator==(const Configuration& other) const;
   bool operator!=(const Configuration& other) const;
 };
 class Problem {
-  [[nodiscard]] Configuration currentConfiguration() const;
+ public:
   [[nodiscard]] Configuration getRandomConfiguration() const;
   [[nodiscard]] Configuration getRandomNeighbor(
       const Configuration& configuration
@@ -63,7 +66,8 @@ class Problem {
 };
 
 template <typename T>
-concept Configurable = std::equality_comparable && std::copy_constructible;
+concept Configurable =
+    std::equality_comparable<T> && std::copy_constructible<T>;
 
 template <typename T>
 concept Criteriable = std::copy_constructible<T> && requires(T t1, T t2) {
@@ -94,7 +98,7 @@ concept Problemable = requires(T t, Configuration configuration) {
  *  - Cool and frozen could be functors
  *  - Schedule seems too rigid
  */
-template <Configurable Configuration, Criteriable Criteria, Problemable Problem>
+template <Configurable Configuration, Criteriable Criteria, typename Problem>
   requires Problemable<Problem, Configuration, Criteria>
 class Cooling {
  private:
