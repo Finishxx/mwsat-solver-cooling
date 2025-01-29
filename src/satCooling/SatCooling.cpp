@@ -12,7 +12,12 @@ bool SatCriteria::isSatisfied() const {
 }
 
 bool SatCriteria::operator<(const SatCriteria& other) const {
-  return howMuchWorseThan(other) < 0;
+  // We are worse
+  return howMuchWorseThan(other) > 0;
+}
+bool SatCriteria::operator>=(const SatCriteria& other) const {
+  // We are better (worse in minus)
+  return howMuchWorseThan(other) <= 0;
 }
 
 // We need to know how worse we are => him - us

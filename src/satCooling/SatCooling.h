@@ -21,6 +21,7 @@ class SatCriteria {
 
   [[nodiscard]] bool isSatisfied() const;
   bool operator<(const SatCriteria& other) const;
+  bool operator>=(const SatCriteria& other) const;
   [[nodiscard]] double howMuchWorseThan(const SatCriteria& other) const;
 };
 

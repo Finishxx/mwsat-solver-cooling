@@ -1,7 +1,10 @@
 #pragma once
 
+#include <cmath>
 #include <concepts>
 #include <cstdint>
+
+#include "Rng.h"
 
 /** Data controlling the schedule of cooling and how long the search lasts */
 struct CoolingSchedule {
@@ -34,22 +37,11 @@ struct CoolingSchedule {
 /**
  * Generic simulated cooling solver
  * Requires a Problem, Configuration and Optimization Criteria
- *
- * Problem
- * - Interface with following methods:
- *  - Configuration getRandomConfiguration()
- *  - Configuration getRandomNeighbor(Configuration)
- *  - Criteria evaluateConfiguration(Configuration)
- *  - void applyConfiguration(Configuration)
- * Configuration
- *  - Just output class we know nothing about and is passed around
- * Optimization Criteria
- *  - bool {better|worse}[orEqual](Criteria)
- *  - double howMuch{better|worse}(Criteria)
  */
 class Criteria {
  public:
   Criteria(const Criteria& other);
+  [[nodiscard]] bool isValid() const;
   bool operator<(const Criteria& other) const;
   [[nodiscard]] double howMuchWorseThan(const Criteria& other) const;
 };
@@ -60,10 +52,14 @@ class Configuration {
   bool operator!=(const Configuration& other) const;
 };
 class Problem {
-  Configuration currentConfiguration() const;
-  Configuration getRandomConfiguration() const;
-  Configuration getRandomNeighbor(const Configuration& configuration) const;
-  Criteria evaluateConfiguration(const Configuration& configuration) const;
+  [[nodiscard]] Configuration currentConfiguration() const;
+  [[nodiscard]] Configuration getRandomConfiguration() const;
+  [[nodiscard]] Configuration getRandomNeighbor(
+      const Configuration& configuration
+  ) const;
+  [[nodiscard]] Criteria evaluateConfiguration(
+      const Configuration& configuration
+  ) const;
 };
 
 template <typename T>
@@ -71,17 +67,17 @@ concept Configurable = std::equality_comparable && std::copy_constructible;
 
 template <typename T>
 concept Criteriable = std::copy_constructible<T> && requires(T t1, T t2) {
+  { t1.isValid() } -> std::convertible_to<bool>;
   { t1 < t2 };
+  { t1 >= t2 } -> std::convertible_to<bool>;
   { t1.howMuchWorseThan(t2) } -> std::convertible_to<double>;
 };
 
 template <typename T, typename Configuration, typename Criteria>
 concept Problemable = requires(T t, Configuration configuration) {
-  { t.currentConfiguration() } -> std::convertible_to<Configuration>;
   { t.getRandomConfiguration() } -> std::convertible_to<Configuration>;
   { t.getRandomNeighbor(configuration) } -> std::convertible_to<Configuration>;
   { t.evaluateConfiguration(configuration) } -> std::convertible_to<Criteria>;
-  { t.applyConfiguration(configuration) };
 };
 
 /**
@@ -113,10 +109,13 @@ class Cooling {
   Criteria bestCriteria;
   double temperature;
 
-  // Steps
+  // Changes with equilibrium
   uint32_t stepsTotal = 0;
+  // Changes with equilibrium
   uint32_t stepsInEquilibrium = 0;
+  // Changes when we accept next candidate
   uint32_t stepsSinceChange = 0;
+  // Changes when accepted candidate is better
   uint32_t stepsSinceBetterment = 0;
 
  public:
@@ -149,7 +148,7 @@ class Cooling {
         schedule.stopAfterNoBetterment <= stepsSinceBetterment;
   }
   bool notFrozen() const { return !isFrozen(); }
-  const CoolingSchedule& coolingSchedule() { return schedule; }
+  const CoolingSchedule& coolingSchedule() const { return schedule; }
   ///@}
 
   /// @name Search execution
@@ -164,46 +163,50 @@ class Cooling {
   /** Does as many step as necessary to end the search */
   void simulateCooling() {
     while (notFrozen()) {
+      // Is equilibrium over?
       if (stepsInEquilibrium >= schedule.equilibrium) {
         temperature = temperature * schedule.coolingFactor;
         stepsInEquilibrium = 0;
         continue;
       }
 
+      // Update steps
       stepsInEquilibrium++;
       stepsTotal++;
       stepsSinceBetterment++;
       stepsSinceChange++;
+
       Configuration candidate = problem.getRandomNeighbor(candidate);
       Criteria candidateCriteria = problem.evaluateConfiguration(candidate);
-
-      if (candidate == currentConfig) {  // Can't chagn
+      if (candidate == currentConfig) {
         continue;
       }
 
+      // Swap current with candidate
       if (candidateCriteria >= currentCriteria) {
-        currentConfig = candidate;
-        currentCriteria = candidateCriteria;
-        stepsSinceChange = 0;
-        if (candidateCriteria >= bestCriteria) {
-          bestConfig = candidate;
-          bestCriteria = candidateCriteria;
-          stepsSinceBetterment = 0;
-        }
-        problem.applyConfiguration(candidate);
+        swapCandidate(candidate, candidateCriteria);
         continue;
       }
 
       // else: decide if we want to apply the less good candidate anyway
       uint32_t difference = candidateCriteria.howMuchWorseThan(currentCriteria);
-      if (random(0, 1) < exp(-(difference / temperature))) {
-        currentConfig = candidate;
-        currentCriteria = candidateCriteria;
-        stepsSinceChange = 0;
+      if (Rng::nextDoublePercent() < std::exp(-(difference / temperature))) {
+        swapCandidate(candidate, candidateCriteria);
       }
     }
+  }
 
-    // TODO: Rest
+  void swapCandidate(
+      const Configuration& candidate, const Criteria& candidateCriteria
+  ) {
+    currentConfig = candidate;
+    currentCriteria = candidateCriteria;
+    stepsSinceChange = 0;
+    if (candidateCriteria >= bestCriteria) {
+      bestConfig = candidate;
+      bestCriteria = candidateCriteria;
+      stepsSinceBetterment = 0;
+    }
   }
   ///@}
 

@@ -11,6 +11,8 @@ class Rng {
 
   static uint64_t next();
   static double nextDouble();
+  /** Returns a double in the range of (0, 1) */
+  static double nextDoublePercent();
   /** @return true on success */
   static void initWithSeed(uint64_t seed);
   static void initWithState(std::array<uint64_t, 4> state);
