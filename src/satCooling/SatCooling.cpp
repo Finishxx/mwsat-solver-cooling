@@ -2,13 +2,42 @@
 
 #include "Rng.h"
 
-SatCriteria::SatCriteria(uint32_t satisfiedCount, int32_t weights)
-    : satisfiedCount(satisfiedCount), weights(weights) {}
+SatCriteria::SatCriteria(
+    const WSatInstance& instance, uint32_t satisfiedCount, int32_t weights
+)
+    : instance(&instance), satisfiedCount(satisfiedCount), weights(weights) {}
+
+bool SatCriteria::isSatisfied() const {
+  return satisfiedCount == instance->clauses().size();
+}
 
 bool SatCriteria::operator<(const SatCriteria& other) const {
-  if (this->satisfiedCount < other.satisfiedCount) return true;
-  if (this->weights < other.weights) return true;
-  return false;
+  return howMuchWorseThan(other) < 0;
+}
+
+// We need to know how worse we are => him - us
+double SatCriteria::howMuchWorseThan(const SatCriteria& other) const {
+  // Both formulas satisfied => compare weights
+  if (this->isSatisfied() and other.isSatisfied())
+    return other.weights - this->weights;
+
+  // Neither formulas satisfied => compare satisfied
+  if (not this->isSatisfied() && not other.isSatisfied())
+    return other.satisfiedCount - this->satisfiedCount;
+
+  // We are satisfied, but he is not => penalize him
+  if (this->isSatisfied() && not other.isSatisfied()) {
+    double satisfiedRatio =
+        static_cast<double>(other.satisfiedCount) / instance->clauses().size();
+    return (other.weights * (satisfiedRatio * satisfiedRatio)) - this->weights;
+  }
+
+  // We are not satisfied, but he is => penalize ourselves
+  if (not this->isSatisfied() && other.isSatisfied()) {
+    double satisfiedRatio =
+        static_cast<double>(this->satisfiedCount) / instance->clauses().size();
+    return other.weights - (this->weights * (satisfiedRatio * satisfiedRatio));
+  }
 }
 
 // SatCooling
@@ -35,7 +64,6 @@ SatCriteria SatCooling::evaluateConfiguration(const SatConfig& configuration
   for (const Clause clause& : instance.clauses) {
     for (const Term disjunct& : clause.disjuncts()) {
       bool isSet = configuration.byId(disjunct.id());
-      // any disjunct is set
       if ((disjunct.isPlain() && isSet) or (disjunct.isNegated() && !isSet)) {
         satisfiedClauses += 1;
         break;
@@ -49,7 +77,7 @@ SatCriteria SatCooling::evaluateConfiguration(const SatConfig& configuration
       totalWeights += instance.variables().at(i + 1).weight();
     }
   }
-  return SatCriteria(satisfiedClauses, totalWeights);
+  return SatCriteria(instance, satisfiedClauses, totalWeights);
 }
 SatCooling::SatCooling(ParsedDimacsFile parsedInstance)
     : instance(WSatInstance(parsedInstance.clauses, parsedInstance.weights)) {}

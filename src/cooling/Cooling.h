@@ -51,7 +51,6 @@ class Criteria {
  public:
   Criteria(const Criteria& other);
   bool operator<(const Criteria& other) const;
-  [[nodiscard]] double howMuchBetterThan(const Criteria& other) const;
   [[nodiscard]] double howMuchWorseThan(const Criteria& other) const;
 };
 class Configuration {
@@ -74,7 +73,6 @@ template <typename T>
 concept Criteriable = std::copy_constructible<T> && requires(T t1, T t2) {
   { t1 < t2 };
   { t1.howMuchWorseThan(t2) } -> std::convertible_to<double>;
-  { t1.howMuchBetterThan(t2) } -> std::convertible_to<double>;
 };
 
 template <typename T, typename Configuration, typename Criteria>

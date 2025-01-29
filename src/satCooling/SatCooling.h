@@ -10,14 +10,17 @@
  */
 class SatCriteria {
  private:
+  WSatInstance const* instance;
   uint32_t satisfiedCount;
   int32_t weights;
 
  public:
-  SatCriteria(uint32_t satisfiedCount, int32_t weights);
+  SatCriteria(
+      const WSatInstance& instance, uint32_t satisfiedCount, int32_t weights
+  );
 
+  [[nodiscard]] bool isSatisfied() const;
   bool operator<(const SatCriteria& other) const;
-  [[nodiscard]] double howMuchBetterThan(const SatCriteria& other) const;
   [[nodiscard]] double howMuchWorseThan(const SatCriteria& other) const;
 };
 
