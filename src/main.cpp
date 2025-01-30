@@ -78,10 +78,15 @@ int main(int argc, char** argv) {
   );
   std::cout << "Here" << std::endl;
 
-  simulatedCooling.simulateCooling();
+  while (true) {
+    SatCriteria currentCriteria = simulatedCooling.copyCurrentCriteria();
+    std::cout << "satisfiedCount: " << currentCriteria.satisfied()
+              << ", weight:" << currentCriteria.weight() << std::endl;
+    if (!simulatedCooling.step()) break;
+  }
 
   SatCriteria criteria = simulatedCooling.copyBestCriteria();
-  std::cout << "Criteria: " << criteria.satisfied() << std::endl;
+  std::cout << "SatisfiedCount: " << criteria.satisfied() << std::endl;
   std::cout << "Weight: " << criteria.weight() << std::endl;
   std::cout << "Ended after " << simulatedCooling.getStepsTotal()
             << " iterations" << std::endl;

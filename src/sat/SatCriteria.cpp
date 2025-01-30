@@ -1,5 +1,7 @@
 #include "SatCriteria.h"
 
+#include <iostream>
+
 SatCriteria::SatCriteria(
     const WSatInstance& instance, uint32_t satisfiedCount, int32_t weights
 )
@@ -37,12 +39,22 @@ double SatCriteria::howMuchWorseThan(const SatCriteria& other) const {
   if (this->isSatisfied() && not other.isSatisfied()) {
     double satisfiedRatio =
         static_cast<double>(other.satisfiedCount) / instance->clauses().size();
-    return (other.weights * (satisfiedRatio * satisfiedRatio)) - this->weights;
+    return (other.weights * satisfiedRatio) - this->weights;
   }
 
   // We are not satisfied, but he is => penalize ourselves
   // if (not this->isSatisfied() && other.isSatisfied()) {
   double satisfiedRatio =
       static_cast<double>(this->satisfiedCount) / instance->clauses().size();
-  return other.weights - (this->weights * (satisfiedRatio * satisfiedRatio));
+  return other.weights - (this->weights * satisfiedRatio);
+}
+std::ostream& operator<<(
+    std::ostream& os, const SatCriteria& criteria
+) {
+  os << "SatCriteria(satisfiedCount=" << criteria.satisfied()
+     << ", weight=" << criteria.weight()
+     << ", isValid=" << (criteria.isValid() ? "true" : "false")
+     << ", isSatisfied=" << (criteria.isSatisfied() ? "true" : "false")
+     << ")";
+  return os;
 }

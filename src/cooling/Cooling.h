@@ -47,6 +47,7 @@ class Criteria {
   bool operator<(const Criteria& other) const;
   bool operator>=(const Criteria& other) const;
   [[nodiscard]] double howMuchWorseThan(const Criteria& other) const;
+
 };
 class Configuration {
  public:
@@ -76,6 +77,7 @@ concept Criteriable = std::copy_constructible<T> && requires(T t1, T t2) {
   { t1 < t2 };
   { t1 >= t2 } -> std::convertible_to<bool>;
   { t1.howMuchWorseThan(t2) } -> std::convertible_to<double>;
+  { std::cout << t1 } -> std::same_as<std::ostream&>;
 };
 
 template <typename T, typename Configuration, typename Criteria>
@@ -189,21 +191,23 @@ class Cooling {
 
     Configuration candidate = problem.getRandomNeighbor(currentConfig);
     Criteria candidateCriteria = problem.evaluateConfiguration(candidate);
-    if (candidate == currentConfig) {
-      return true;
-    }
+
+    double candidateWorse = candidateCriteria.howMuchWorseThan(currentCriteria);
+    std::cout << "Candidate: " << candidateCriteria << std::endl;
+    std::cout << "Current: " << currentCriteria << std::endl;
+    std::cout << "CandidateWorse" << candidateWorse << std::endl;
 
     // Swap current with candidate
-    if (candidateCriteria >= currentCriteria) {
+    if (candidateWorse <= 0) {
       swapCandidate(candidate, candidateCriteria);
       return true;
     }
 
     // else: decide if we want to apply the less good candidate anyway
-    uint32_t difference = candidateCriteria.howMuchWorseThan(currentCriteria);
-    if (Rng::nextDoublePercent() < std::exp(-(difference / temperature))) {
+    if (Rng::nextDoublePercent() < std::exp(-(candidateWorse / temperature))) {
       swapCandidate(candidate, candidateCriteria);
     }
+    return true;
   }
 
   /** Does as many step as necessary to end the search */
@@ -217,7 +221,9 @@ class Cooling {
     currentConfig = candidate;
     currentCriteria = candidateCriteria;
     stepsSinceChange = 0;
-    if (candidateCriteria >= bestCriteria) {
+
+    double bestWorse = bestCriteria.howMuchWorseThan(currentCriteria);
+    if (bestWorse > 0 && currentCriteria.isValid()) {
       bestConfig = candidate;
       bestCriteria = candidateCriteria;
       stepsSinceBetterment = 0;

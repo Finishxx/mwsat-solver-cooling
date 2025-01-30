@@ -1,5 +1,7 @@
 #ifndef SATCRITERIA_H
 #define SATCRITERIA_H
+#include <ostream>
+
 #include "WSatInstance.h"
 
 /**
@@ -14,6 +16,8 @@ class SatCriteria {
   int32_t weights;
 
  public:
+  friend std::ostream& operator<<(std::ostream& os, const SatCriteria& criteria);
+
   SatCriteria() = default;
   SatCriteria(
       const WSatInstance& instance, uint32_t satisfiedCount, int32_t weights
@@ -27,5 +31,6 @@ class SatCriteria {
   bool operator>=(const SatCriteria& other) const;
   [[nodiscard]] double howMuchWorseThan(const SatCriteria& other) const;
 };
+
 
 #endif  // SATCRITERIA_H
