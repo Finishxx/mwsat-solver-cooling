@@ -58,14 +58,8 @@ int main(int argc, char** argv) {
     std::cerr << "Input file " << inputPath << " does not exist" << std::endl;
     return EXIT_FAILURE;
   }
-  // Check seed
-  try {
-    seed = std::stoi(seedStr);
-  } catch (...) {
-    std::cerr << "Invalid seed: " << seedStr << std::endl;
-    return EXIT_FAILURE;
-  }
-  Rng::initWithSeed(seed);
+
+  Rng::deserializeSeed(seedStr);
 
   std::ifstream stream(inputPath.c_str());
   ParsedDimacsFile input = parseDimacsFile(stream);

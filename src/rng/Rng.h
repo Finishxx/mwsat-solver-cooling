@@ -15,5 +15,6 @@ class Rng {
   static double nextDoublePercent();
   /** @return true on success */
   static void initWithSeed(uint64_t seed);
+  static void deserializeSeed(std::string seed);
   static void initWithState(std::array<uint64_t, 4> state);
 };

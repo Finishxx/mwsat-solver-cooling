@@ -17,6 +17,11 @@ uint64_t Rng::next() { return rng_next(); }
 double Rng::nextDouble() { return rng_next_double(); }
 double Rng::nextDoublePercent() { return std::fmod(nextDouble(), 1.0); }
 void Rng::initWithSeed(uint64_t seed) { rng_set_seed(seed); }
+void Rng::deserializeSeed(std::string seed) {
+  rng_seed_t mySeed;
+  rng_seed_deseri(seed.data(), &mySeed);
+  rng_set_seed(mySeed);
+}
 void Rng::initWithState(std::array<uint64_t, 4> state) {
   auto myState = rng_state_t{state[0], state[1], state[2], state[3]};
   rng_set_state(&myState);
