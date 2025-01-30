@@ -2,6 +2,7 @@ add_subdirectory(cooling)
 add_subdirectory(sat)
 add_subdirectory(rng)
 add_subdirectory(dimacs)
+add_subdirectory(debug)
 
 add_executable(main main.cpp)
 target_link_libraries(main PUBLIC cooling sat dimacs_parsing rng)

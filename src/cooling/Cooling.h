@@ -4,8 +4,8 @@
 #include <concepts>
 #include <cstdint>
 #include <iostream>
-
 #include "Rng.h"
+#include "debug.h"
 
 /** Data controlling the schedule of cooling and how long the search lasts */
 struct CoolingSchedule {
@@ -153,13 +153,13 @@ class Cooling {
   ///@{
   [[nodiscard]] bool isFrozen() const {
     if (temperature <= schedule.stopTemperature) {
-      std::cout << "Ended because of temperature" << std::endl;
+      DEBUG_PRINT("Ended because of temperature")
     } else if (schedule.stopAfterTotalSteps <= stepsTotal) {
-      std::cout << "Ended because of max steps" << std::endl;
+      DEBUG_PRINT("Ended because of max steps")
     } else if (schedule.stopAfterNoChange <= stepsSinceChange) {
-      std::cout << "Ended because of steps since change" << std::endl;
+      DEBUG_PRINT("Ended because of steps since change")
     } else if (schedule.stopAfterNoBetterment <= stepsSinceBetterment) {
-      std::cout << "Ended because of steps since betterment" << std::endl;
+      DEBUG_PRINT("Ended because of steps since betterment")
     } else {
       return false;
     }
@@ -193,6 +193,8 @@ class Cooling {
     Criteria candidateCriteria = problem.evaluateConfiguration(candidate);
 
     double candidateWorse = candidateCriteria.howMuchWorseThan(currentCriteria);
+
+
     std::cout << "Candidate: " << candidateCriteria << std::endl;
     std::cout << "Current: " << currentCriteria << std::endl;
     std::cout << "CandidateWorse" << candidateWorse << std::endl;
