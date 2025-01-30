@@ -1,11 +1,10 @@
 add_subdirectory(cooling)
 add_subdirectory(sat)
-add_subdirectory(satCooling)
 add_subdirectory(rng)
-
+add_subdirectory(dimacs)
 
 add_executable(main main.cpp)
-target_link_libraries(main PUBLIC cooling sat_cooling dimacs_parsing rng)
+target_link_libraries(main PUBLIC cooling sat dimacs_parsing rng)
 
 # CLI11
 include(FetchContent)

@@ -1,10 +1,12 @@
+#include <SatCooling.h>
+
 #include <CLI/CLI.hpp>
 #include <filesystem>
 #include <iostream>
 
-#include "cooling/Cooling.h"
-#include "rng/Rng.h"
-#include "satCooling/SatCooling.h"
+#include "Cooling.h"
+#include "Rng.h"
+#include "dimacsParsing.h"
 
 int main(int argc, char** argv) {
   CLI::App app{"App description"};
@@ -76,7 +78,7 @@ int main(int argc, char** argv) {
       withoutChange,
       withoutGain
   );
-  SatCooling satCooling(input);
+  SatCooling satCooling(input.clauses, input.weights);
   Cooling<SatConfig, SatCriteria, SatCooling> simulatedCooling(
       satCooling, schedule
   );

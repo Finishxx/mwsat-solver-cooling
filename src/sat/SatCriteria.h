@@ -1,6 +1,6 @@
-#pragma once
-#include "../sat/SatConfig.h"
-#include "../sat/dimacsParsing.h"
+#ifndef SATCRITERIA_H
+#define SATCRITERIA_H
+#include "WSatInstance.h"
 
 /**
  * Bridge between Cooling and Sat modules
@@ -26,17 +26,4 @@ class SatCriteria {
   [[nodiscard]] double howMuchWorseThan(const SatCriteria& other) const;
 };
 
-class SatCooling {
- private:
-  WSatInstance instance;
-
- public:
-  [[nodiscard]] SatConfig getRandomConfiguration() const;
-  [[nodiscard]] SatConfig getRandomNeighbor(
-      const SatConfig& configuration
-  ) const;
-  [[nodiscard]] SatCriteria evaluateConfiguration(
-      const SatConfig& configuration
-  ) const;
-  explicit SatCooling(ParsedDimacsFile parsedInstance);
-};
+#endif  // SATCRITERIA_H
