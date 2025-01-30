@@ -83,6 +83,12 @@ int main(int argc, char** argv) {
   SatCriteria criteria = simulatedCooling.copyBestCriteria();
   std::cout << "Criteria: " << criteria.satisfied() << std::endl;
   std::cout << "Weight: " << criteria.weight() << std::endl;
+  std::cout << "Ended after " << simulatedCooling.getStepsTotal()
+            << " iterations" << std::endl;
+  std::cout << "Steps since change: " << simulatedCooling.getStepsSinceChange()
+            << std::endl;
+  std::cout << "Steps since betterment: "
+            << simulatedCooling.getStepsSinceBetterment() << std::endl;
 
   return 0;
 }

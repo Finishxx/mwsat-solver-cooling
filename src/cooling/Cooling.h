@@ -124,6 +124,9 @@ class Cooling {
   uint32_t stepsSinceBetterment = 0;
 
  public:
+  uint32_t getStepsTotal() const { return stepsTotal; }
+  uint32_t getStepsSinceChange() const { return stepsSinceChange; }
+  uint32_t getStepsSinceBetterment() const { return stepsSinceBetterment; }
   Cooling(Problem problem, Configuration start, const CoolingSchedule& schedule)
       : schedule(schedule),
         problem(problem),
@@ -171,46 +174,43 @@ class Cooling {
   /** Does one step in equilibrium @return true if search not over */
   bool step() {
     if (isFrozen()) return false;
+    // Is equilibrium over?
+    if (stepsInEquilibrium >= schedule.equilibrium) {
+      temperature = temperature * schedule.coolingFactor;
+      stepsInEquilibrium = 0;
+      return true;
+    }
 
-    return true;
-    // TODO: Rest
-  }
-  /** Does as many step as necessary to end the search */
-  void simulateCooling() {
-    while (notFrozen()) {
-      // Is equilibrium over?
-      if (stepsInEquilibrium >= schedule.equilibrium) {
-        temperature = temperature * schedule.coolingFactor;
-        stepsInEquilibrium = 0;
-        continue;
-      }
+    // Update steps
+    stepsInEquilibrium++;
+    stepsTotal++;
+    stepsSinceBetterment++;
+    stepsSinceChange++;
 
-      // Update steps
-      stepsInEquilibrium++;
-      stepsTotal++;
-      stepsSinceBetterment++;
-      stepsSinceChange++;
+    Configuration candidate = problem.getRandomNeighbor(currentConfig);
+    Criteria candidateCriteria = problem.evaluateConfiguration(candidate);
+    if (candidate == currentConfig) {
+      return true;
+    }
 
-      Configuration candidate = problem.getRandomNeighbor(currentConfig);
-      Criteria candidateCriteria = problem.evaluateConfiguration(candidate);
-      if (candidate == currentConfig) {
-        continue;
-      }
+    // Swap current with candidate
+    if (candidateCriteria >= currentCriteria) {
+      swapCandidate(candidate, candidateCriteria);
+      return true;
+    }
 
-      // Swap current with candidate
-      if (candidateCriteria >= currentCriteria) {
-        swapCandidate(candidate, candidateCriteria);
-        continue;
-      }
-
-      // else: decide if we want to apply the less good candidate anyway
-      uint32_t difference = candidateCriteria.howMuchWorseThan(currentCriteria);
-      if (Rng::nextDoublePercent() < std::exp(-(difference / temperature))) {
-        swapCandidate(candidate, candidateCriteria);
-      }
+    // else: decide if we want to apply the less good candidate anyway
+    uint32_t difference = candidateCriteria.howMuchWorseThan(currentCriteria);
+    if (Rng::nextDoublePercent() < std::exp(-(difference / temperature))) {
+      swapCandidate(candidate, candidateCriteria);
     }
   }
 
+  /** Does as many step as necessary to end the search */
+  void simulateCooling() {
+    while (step()) {
+    }
+  }
   void swapCandidate(
       const Configuration& candidate, const Criteria& candidateCriteria
   ) {
