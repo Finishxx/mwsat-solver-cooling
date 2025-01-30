@@ -1,8 +1,9 @@
 #include "Rng.h"
 
 #include <cmath>
-
+extern "C" {
 #include "xoshiro256plus.h"
+}
 
 std::array<uint64_t, 4> Rng::getState() {
   rng_state_t* state = nullptr;

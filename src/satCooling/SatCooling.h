@@ -1,7 +1,6 @@
 #pragma once
 #include "../sat/SatConfig.h"
 #include "../sat/dimacsParsing.h"
-#include "Cooling.h"
 
 /**
  * Bridge between Cooling and Sat modules
@@ -15,10 +14,12 @@ class SatCriteria {
   int32_t weights;
 
  public:
+  SatCriteria() = default;
   SatCriteria(
       const WSatInstance& instance, uint32_t satisfiedCount, int32_t weights
   );
 
+  [[nodiscard]] bool isValid() const;
   [[nodiscard]] bool isSatisfied() const;
   bool operator<(const SatCriteria& other) const;
   bool operator>=(const SatCriteria& other) const;
@@ -31,9 +32,11 @@ class SatCooling {
 
  public:
   [[nodiscard]] SatConfig getRandomConfiguration() const;
-  [[nodiscard]] SatConfig getRandomNeighbor(const SatConfig& configuration
+  [[nodiscard]] SatConfig getRandomNeighbor(
+      const SatConfig& configuration
   ) const;
-  [[nodiscard]] SatCriteria evaluateConfiguration(const SatConfig& configuration
+  [[nodiscard]] SatCriteria evaluateConfiguration(
+      const SatConfig& configuration
   ) const;
   explicit SatCooling(ParsedDimacsFile parsedInstance);
 };

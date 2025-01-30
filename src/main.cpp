@@ -2,6 +2,10 @@
 #include <filesystem>
 #include <iostream>
 
+#include "cooling/Cooling.h"
+#include "rng/Rng.h"
+#include "satCooling/SatCooling.h"
+
 int main(int argc, char** argv) {
   CLI::App app{"App description"};
 
@@ -12,11 +16,10 @@ int main(int argc, char** argv) {
   uint64_t seed;
   app.add_option("-s,--seed", seedStr, "64-bit hex seed")->required();
 
-  double initialTemperature;
-  app.add_option("-t,--startTemperature", initialTemperature)->required();
-
-  double finalTemperature;
-  app.add_option("-T,--endTemperature", finalTemperature)->required();
+  double startTemperature;
+  app.add_option("-t,--startTemperature", startTemperature)->required();
+  double endTemperature;
+  app.add_option("-T,--endTemperature", endTemperature)->required();
 
   double cooling;
   app.add_option("-c,--cooling", cooling, "Cooling coefficient")->required();
@@ -24,16 +27,17 @@ int main(int argc, char** argv) {
   uint32_t equilibrium;
   app.add_option("-e,--equilibrium", equilibrium)->required();
 
-  std::filesystem::path debugFile;
+  std::filesystem::path debugPath;
   app.add_option(
       "-d,--debug",
-      debugFile,
+      debugPath,
       "Where to write <stepNum> <currentSatisfied> <currentWeight> "
       "<maxWeight> on each line per step"
   );
 
-  uint32_t maxIter;
-  app.add_option("-i,--maxIter", maxIter, "Iterations before end")->required();
+  uint32_t maxIterations;
+  app.add_option("-i,--maxIterations", maxIterations, "Iterations before end")
+      ->required();
 
   uint32_t withoutGain;
   app.add_option("-g,--gain", withoutGain, "End after steps without gain")
@@ -41,31 +45,43 @@ int main(int argc, char** argv) {
 
   uint32_t withoutChange;
   app.add_option(
-         "-a,--adjustment",
-         withoutChange,
-         "End after steps without change"
+         "-a,--adjustment", withoutChange, "End after steps without change"
   )
       ->required();
 
   CLI11_PARSE(app, argc, argv);
 
+  // Check input path
   if (!exists(inputPath)) {
     std::cerr << "Input file " << inputPath << " does not exist" << std::endl;
     return EXIT_FAILURE;
   }
+  // Check seed
   try {
     seed = std::stoi(seedStr);
   } catch (...) {
     std::cerr << "Invalid seed: " << seedStr << std::endl;
     return EXIT_FAILURE;
   }
+  Rng::initWithSeed(seed);
 
-  // We don't check others, because that is domain-dependent
+  std::ifstream stream(inputPath.c_str());
+  ParsedDimacsFile input = parseDimacsFile(stream);
+  CoolingSchedule schedule(
+      equilibrium,
+      cooling,
+      startTemperature,
+      endTemperature,
+      maxIterations,
+      withoutChange,
+      withoutGain
+  );
+  SatCooling satCooling(input);
+  Cooling<SatConfig, SatCriteria, SatCooling> simulatedCooling(
+      satCooling, schedule
+  );
 
-  seed;
-
-  // std::err << stepTotal << " " << lastChange << " " << wasSatisfied << " " <<
-  // maxWeight << std::endl;
+  simulatedCooling.simulateCooling();
 
   return 0;
 }

@@ -7,6 +7,8 @@ SatCriteria::SatCriteria(
 )
     : instance(&instance), satisfiedCount(satisfiedCount), weights(weights) {}
 
+bool SatCriteria::isValid() const { return isSatisfied(); }
+
 bool SatCriteria::isSatisfied() const {
   return satisfiedCount == instance->clauses().size();
 }
@@ -62,7 +64,8 @@ SatConfig SatCooling::getRandomNeighbor(const SatConfig& configuration) const {
   return SatConfig(std::move(copy));
 }
 
-SatCriteria SatCooling::evaluateConfiguration(const SatConfig& configuration
+SatCriteria SatCooling::evaluateConfiguration(
+    const SatConfig& configuration
 ) const {
   uint32_t satisfiedClauses = 0;
   for (const Clause& clause : instance.clauses()) {
