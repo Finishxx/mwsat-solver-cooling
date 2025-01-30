@@ -30,7 +30,6 @@ ParsedDimacsFile parseDimacsFile(std::istream& input) {
 
   for (std::string line; std::getline(input, line);) {
     std::vector<std::string> words = toWords(line);
-    std::cout << fmt::format("words: {}", words) << std::endl;
 
     if (line.empty() || words[0] == "c") continue;  // Comment
     if (words[0] == "p") {  // Parsing format and var/clause counts

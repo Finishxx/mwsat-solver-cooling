@@ -76,24 +76,32 @@ int main(int argc, char** argv) {
   Cooling<SatConfig, SatCriteria, SatCooling> simulatedCooling(
       satCooling, schedule
   );
-  std::cout << "Here" << std::endl;
 
-  while (true) {
-    SatCriteria currentCriteria = simulatedCooling.copyCurrentCriteria();
-    std::cout << "satisfiedCount: " << currentCriteria.satisfied()
-              << ", weight:" << currentCriteria.weight() << std::endl;
-    if (!simulatedCooling.step()) break;
+  while (simulatedCooling.step()) {
   }
 
-  SatCriteria criteria = simulatedCooling.copyBestCriteria();
-  std::cout << "SatisfiedCount: " << criteria.satisfied() << std::endl;
-  std::cout << "Weight: " << criteria.weight() << std::endl;
+  SatCriteria finalCriteria = simulatedCooling.copyBestCriteria();
+
+#ifdef DEBUG_ENABLED
+  std::cout << "SatisfiedCount: " << finalCriteria.satisfied() << std::endl;
+  std::cout << "Weight: " << finalCriteria.weight() << std::endl;
   std::cout << "Ended after " << simulatedCooling.getStepsTotal()
             << " iterations" << std::endl;
   std::cout << "Steps since change: " << simulatedCooling.getStepsSinceChange()
             << std::endl;
   std::cout << "Steps since betterment: "
             << simulatedCooling.getStepsSinceBetterment() << std::endl;
+#endif
 
+  std::cout << inputPath.filename().string() << " " << finalCriteria.weight()
+            << " ";
+  SatConfig config = simulatedCooling.copyBestConfiguration();
+  for (int i = 1; i < config.underlying.size() + 1; i++) {
+    if (config.underlying[i - 1] == true)
+      std::cout << i;
+    else
+      std::cout << -i;
+    if (i != config.underlying.size()) std::cout << " ";
+  }
   return 0;
 }

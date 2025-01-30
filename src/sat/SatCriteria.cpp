@@ -33,8 +33,9 @@ double SatCriteria::howMuchWorseThan(const SatCriteria& other) const {
 
   // Neither formulas satisfied => compare satisfied
   if (not this->isSatisfied() && not other.isSatisfied())
-    return static_cast<int64_t>(other.satisfiedCount) -
-        static_cast<int64_t>(this->satisfiedCount);
+    return (static_cast<int64_t>(other.satisfiedCount) -
+            static_cast<int64_t>(this->satisfiedCount)) *
+        std::min(this->weight(), other.weight() / 5);
 
   // We are satisfied, but he is not => penalize him
   if (this->isSatisfied() && not other.isSatisfied()) {

@@ -1,9 +1,6 @@
-# Design
+# TODOs
 
-## Sat
-
-Maybe add clause and term ids too?
-
-Link the ids and indexes to vector information in the plantUML diagrams please
-
-## Simulated annealing
+- [ ] Print out the progress of criteria
+- [ ] Convert prints to debug.h macro calls
+- [ ] Scale the not-satisfied vs. not-satisfied comparison
+- [ ] Maybe different scaling in non-paired comparison?

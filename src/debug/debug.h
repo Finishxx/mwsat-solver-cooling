@@ -7,9 +7,9 @@
 #define DEBUG_ENABLED
 
 #ifdef DEBUG_ENABLED
-    #define DEBUG_PRINT(x) std::cout << x << std::endl;
+#define DEBUG_PRINT(x) std::cout << x << std::endl;
 #else
-    #define DEBUG_PRINT(x)
+#define DEBUG_PRINT(x)
 #endif
 
-#endif // DEBUG_H
+#endif  // DEBUG_H

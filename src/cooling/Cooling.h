@@ -4,6 +4,7 @@
 #include <concepts>
 #include <cstdint>
 #include <iostream>
+
 #include "Rng.h"
 #include "debug.h"
 
@@ -47,7 +48,6 @@ class Criteria {
   bool operator<(const Criteria& other) const;
   bool operator>=(const Criteria& other) const;
   [[nodiscard]] double howMuchWorseThan(const Criteria& other) const;
-
 };
 class Configuration {
  public:
@@ -194,10 +194,9 @@ class Cooling {
 
     double candidateWorse = candidateCriteria.howMuchWorseThan(currentCriteria);
 
-
-    std::cout << "Candidate: " << candidateCriteria << std::endl;
-    std::cout << "Current: " << currentCriteria << std::endl;
-    std::cout << "CandidateWorse" << candidateWorse << std::endl;
+    DEBUG_PRINT("Candidate: " << candidateCriteria)
+    DEBUG_PRINT("Current: " << currentCriteria)
+    DEBUG_PRINT("CandidateWorse" << candidateWorse)
 
     // Swap current with candidate
     if (candidateWorse <= 0) {
