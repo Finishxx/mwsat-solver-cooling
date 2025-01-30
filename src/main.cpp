@@ -82,8 +82,13 @@ int main(int argc, char** argv) {
   Cooling<SatConfig, SatCriteria, SatCooling> simulatedCooling(
       satCooling, schedule
   );
+  std::cout << "Here" << std::endl;
 
   simulatedCooling.simulateCooling();
+
+  SatCriteria criteria = simulatedCooling.copyBestCriteria();
+  std::cout << "Criteria: " << criteria.satisfied() << std::endl;
+  std::cout << "Weight: " << criteria.weight() << std::endl;
 
   return 0;
 }

@@ -1,5 +1,6 @@
 #include "Rng.h"
 
+#include <array>
 #include <cmath>
 extern "C" {
 #include "xoshiro256plus.h"

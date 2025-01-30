@@ -3,6 +3,7 @@
 #include <cmath>
 #include <concepts>
 #include <cstdint>
+#include <iostream>
 
 #include "Rng.h"
 
@@ -145,14 +146,24 @@ class Cooling {
 
   /** @name Schedule */
   ///@{
-  bool isFrozen() const {
-    return temperature <= schedule.stopTemperature ||
-        schedule.stopAfterTotalSteps <= stepsTotal ||
-        schedule.stopAfterNoChange <= stepsSinceChange ||
-        schedule.stopAfterNoBetterment <= stepsSinceBetterment;
+  [[nodiscard]] bool isFrozen() const {
+    if (temperature <= schedule.stopTemperature) {
+      std::cout << "Ended because of temperature" << std::endl;
+    } else if (schedule.stopAfterTotalSteps <= stepsTotal) {
+      std::cout << "Ended because of max steps" << std::endl;
+    } else if (schedule.stopAfterNoChange <= stepsSinceChange) {
+      std::cout << "Ended because of steps since change" << std::endl;
+    } else if (schedule.stopAfterNoBetterment <= stepsSinceBetterment) {
+      std::cout << "Ended because of steps since betterment" << std::endl;
+    } else {
+      return false;
+    }
+    return true;
   }
-  bool notFrozen() const { return !isFrozen(); }
-  const CoolingSchedule& coolingSchedule() const { return schedule; }
+  [[nodiscard]] bool notFrozen() const { return !isFrozen(); }
+  [[nodiscard]] const CoolingSchedule& coolingSchedule() const {
+    return schedule;
+  }
   ///@}
 
   /// @name Search execution
@@ -180,7 +191,7 @@ class Cooling {
       stepsSinceBetterment++;
       stepsSinceChange++;
 
-      Configuration candidate = problem.getRandomNeighbor(candidate);
+      Configuration candidate = problem.getRandomNeighbor(currentConfig);
       Criteria candidateCriteria = problem.evaluateConfiguration(candidate);
       if (candidate == currentConfig) {
         continue;

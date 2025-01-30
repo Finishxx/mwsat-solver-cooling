@@ -3,7 +3,9 @@
 #include <fmt/core.h>
 #include <fmt/ranges.h>
 
+#include <algorithm>
 #include <iostream>
+#include <ranges>
 #include <sstream>
 
 std::vector<std::string> toWords(std::string const& string) {
@@ -12,7 +14,10 @@ std::vector<std::string> toWords(std::string const& string) {
   std::string word;
 
   while (std::getline(iss, word, ' ')) words.push_back(word);
-  return words;
+  // Filter empty words and convert to vector
+  auto res = words |
+      std::views::filter([](const std::string& w) { return !w.empty(); });
+  return std::vector<std::string>(res.begin(), res.end());
 }
 
 // Inspiration here:
@@ -37,30 +42,39 @@ ParsedDimacsFile parseDimacsFile(std::istream& input) {
     } else if (words[0] == "w") {  // Parsing weights
       if (words.size() - 2 != varCount) {
         throw std::invalid_argument(
-            fmt::format("Expected {} weights, but got {}", varCount, words.size() - 2)
+            fmt::format(
+                "Expected {} weights, but got {}", varCount, words.size() - 2
+            )
         );
       }
-      if (*(words.end() - 1) != "0") throw std::invalid_argument("Weights not ended by 0");
+      if (*(words.end() - 1) != "0")
+        throw std::invalid_argument("Weights not ended by 0");
 
       weights.resize(words.size() - 2);
-      std::transform(words.begin() + 1, words.end() - 1, weights.begin(), [](std::string const& s) {
-        return std::stoi(s);
-      });
+      std::transform(
+          words.begin() + 1,
+          words.end() - 1,
+          weights.begin(),
+          [](std::string const& s) { return std::stoi(s); }
+      );
     } else {  // Line with clause
       std::vector<int32_t> clause(words.size());
-      std::transform(words.begin(), words.end(), clause.begin(), [](std::string const& word) {
-        return std::stoi(word);
-      });
+      std::transform(
+          words.begin(),
+          words.end(),
+          clause.begin(),
+          [](std::string const& word) { return std::stoi(word); }
+      );
       clause.pop_back();
       clauses.push_back(clause);
     }
   }
 
-  std::cout << "Here" << std::endl;
-
   if (clauseCount != clauses.size())
     throw std::invalid_argument(
-        fmt::format("Expected {} clauses, but got {}", clauseCount, clauses.size())
+        fmt::format(
+            "Expected {} clauses, but got {}", clauseCount, clauses.size()
+        )
     );
   if (weights.empty()) throw std::invalid_argument("Expected any weights");
   if (clauses.empty()) throw std::invalid_argument("Expected any clauses");
