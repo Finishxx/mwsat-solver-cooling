@@ -10,4 +10,3 @@ FetchContent_MakeAvailable(googletest)
 include(GoogleTest)
 
 add_subdirectory(sat)
-add_subdirectory(cooling)

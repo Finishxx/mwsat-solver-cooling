@@ -5,6 +5,9 @@ SatCriteria::SatCriteria(
 )
     : instance(&instance), satisfiedCount(satisfiedCount), weights(weights) {}
 
+int32_t SatCriteria::weight() const { return weights; }
+uint32_t SatCriteria::satisfied() const { return satisfiedCount; }
+
 bool SatCriteria::isValid() const { return isSatisfied(); }
 
 bool SatCriteria::isSatisfied() const {

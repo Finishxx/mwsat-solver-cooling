@@ -18,6 +18,8 @@ class SatCriteria {
   SatCriteria(
       const WSatInstance& instance, uint32_t satisfiedCount, int32_t weights
   );
+  [[nodiscard]] int32_t weight() const;
+  [[nodiscard]] uint32_t satisfied() const;
 
   [[nodiscard]] bool isValid() const;
   [[nodiscard]] bool isSatisfied() const;

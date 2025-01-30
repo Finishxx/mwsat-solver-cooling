@@ -7,16 +7,26 @@ target_link_libraries(
 )
 gtest_discover_tests(dimacs_parsing_test)
 
-# Solver
+# Instance
 add_executable(
-        solver_test
-        WSatSolverTest.cpp
-        WSatInstanceTest.cpp
+        instance_test
+        SatInstanceTest.cpp
 )
 target_link_libraries(
-        solver_test
-        max_weighted_sat_solver
+        instance_test
+        sat
         dimacs_parsing
         GTest::gtest_main
 )
-gtest_discover_tests(solver_test)
+gtest_discover_tests(instance_test)
+
+# Cooling
+add_executable(sat_cooling_test SatCoolingTest.cpp)
+target_link_libraries(
+        sat_cooling_test
+        sat
+        dimacs_parsing
+        GTest::gtest_main
+)
+gtest_discover_tests(sat_cooling_test)
+

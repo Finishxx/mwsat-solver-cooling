@@ -35,9 +35,9 @@ SatCriteria SatCooling::evaluateConfiguration(
   }
 
   int32_t totalWeights = 0;
-  for (uint32_t i = 0; configuration.underlying.size() < i; i++) {
+  for (uint32_t i = 0; i < configuration.underlying.size(); i++) {
     if (configuration.underlying[i] == true) {
-      totalWeights += instance.variables().at(i + 1).weight();
+      totalWeights += instance.variables().at(i).weight();
     }
   }
   return SatCriteria(instance, satisfiedClauses, totalWeights);
