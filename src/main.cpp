@@ -61,8 +61,8 @@ int main(int argc, char** argv) {
 
   Rng::deserializeSeed(seedStr);
 
-  std::ifstream stream(inputPath.c_str());
-  ParsedDimacsFile input = parseDimacsFile(stream);
+  std::ifstream inputStream(inputPath.c_str());
+  ParsedDimacsFile input = parseDimacsFile(inputStream);
   CoolingSchedule schedule(
       equilibrium,
       cooling,
@@ -77,7 +77,18 @@ int main(int argc, char** argv) {
       satCooling, schedule
   );
 
-  while (simulatedCooling.step()) {
+  if (!debugPath.empty()) {
+    std::ofstream debugStream(debugPath.c_str());
+    while (simulatedCooling.step()) {
+      const SatCriteria& current = simulatedCooling.getCurrentCriteria();
+      const SatCriteria& best = simulatedCooling.getBestCriteria();
+      debugStream << simulatedCooling.getStepsTotal() << " "
+                  << current.satisfied() << " " << current.weight() << " "
+                  << best.weight() << std::endl;
+    }
+  } else {
+    while (simulatedCooling.step()) {
+    }
   }
 
   SatCriteria finalCriteria = simulatedCooling.copyBestCriteria();
