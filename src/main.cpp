@@ -112,13 +112,6 @@ int main(int argc, char** argv) {
     }
   }
 
-  if (!debugPath.empty()) {
-    // Debug route
-    while (simulatedCooling.step()) {
-    }
-  } else {
-  }
-
   SatCriteria finalCriteria = simulatedCooling.copyBestCriteria();
 
 #ifdef DEBUG_ENABLED
