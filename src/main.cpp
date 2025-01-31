@@ -30,7 +30,7 @@ int main(int argc, char** argv) {
   app.add_option("-e,--equilibrium", equilibrium)->required();
 
   std::filesystem::path debugPath;
-  app.add_option(
+  CLI::Option* debugOption = app.add_option(
       "-d,--debug",
       debugPath,
       "Where to write <stepNum> <currentSatisfied> <currentWeight> "
@@ -38,20 +38,35 @@ int main(int argc, char** argv) {
   );
 
   uint32_t maxIterations;
-  app.add_option("-i,--maxIterations", maxIterations, "Iterations before end")
+  app.add_option(
+         "-i,--maxIterations",
+         maxIterations,
+         "Iterations before end, if 0 then infinite"
+  )
       ->required();
 
   uint32_t withoutGain;
-  app.add_option("-g,--gain", withoutGain, "End after steps without gain")
+  app.add_option(
+         "-w,--withoutGain",
+         withoutGain,
+         "End after steps without gain, if 0 then infinite"
+  )
       ->required();
 
   uint32_t withoutChange;
   app.add_option(
-         "-a,--adjustment", withoutChange, "End after steps without change"
+         "-W,--withoutChange",
+         withoutChange,
+         "End after steps without change, if 0 then infinite"
   )
       ->required();
 
   CLI11_PARSE(app, argc, argv);
+
+  // Steps correction
+  if (maxIterations == 0) maxIterations = UINT32_MAX;
+  if (withoutChange == 0) withoutChange = UINT32_MAX;
+  if (withoutGain == 0) withoutGain = UINT32_MAX;
 
   // Check input path
   if (!exists(inputPath)) {
@@ -59,8 +74,10 @@ int main(int argc, char** argv) {
     return EXIT_FAILURE;
   }
 
+  // Set seed
   Rng::deserializeSeed(seedStr);
 
+  // Prepare cooling
   std::ifstream inputStream(inputPath.c_str());
   ParsedDimacsFile input = parseDimacsFile(inputStream);
   CoolingSchedule schedule(
@@ -77,18 +94,29 @@ int main(int argc, char** argv) {
       satCooling, schedule
   );
 
-  if (!debugPath.empty()) {
-    std::ofstream debugStream(debugPath.c_str());
-    while (simulatedCooling.step()) {
+  bool debugEnabled = false;
+  std::ofstream debugStream;
+
+  if (*debugOption) {
+    debugEnabled = true;
+    debugStream = std::ofstream(debugPath.c_str());
+  }
+
+  while (simulatedCooling.step()) {
+    if (debugEnabled) {
       const SatCriteria& current = simulatedCooling.getCurrentCriteria();
       const SatCriteria& best = simulatedCooling.getBestCriteria();
       debugStream << simulatedCooling.getStepsTotal() << " "
                   << current.satisfied() << " " << current.weight() << " "
                   << best.weight() << std::endl;
     }
-  } else {
+  }
+
+  if (!debugPath.empty()) {
+    // Debug route
     while (simulatedCooling.step()) {
     }
+  } else {
   }
 
   SatCriteria finalCriteria = simulatedCooling.copyBestCriteria();
