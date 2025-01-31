@@ -126,9 +126,13 @@ class Cooling {
   uint32_t stepsSinceBetterment = 0;
 
  public:
-  uint32_t getStepsTotal() const { return stepsTotal; }
-  uint32_t getStepsSinceChange() const { return stepsSinceChange; }
-  uint32_t getStepsSinceBetterment() const { return stepsSinceBetterment; }
+  [[nodiscard]] uint32_t getStepsTotal() const { return stepsTotal; }
+  [[nodiscard]] uint32_t getStepsSinceChange() const {
+    return stepsSinceChange;
+  }
+  [[nodiscard]] uint32_t getStepsSinceBetterment() const {
+    return stepsSinceBetterment;
+  }
   Cooling(Problem problem, Configuration start, const CoolingSchedule& schedule)
       : schedule(schedule),
         problem(problem),

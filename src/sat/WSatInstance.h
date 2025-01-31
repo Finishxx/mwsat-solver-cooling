@@ -1,6 +1,5 @@
 #ifndef MAXWSATINSTANCE_H
 #define MAXWSATINSTANCE_H
-#include <algorithm>
 #include <cstdint>
 #include <vector>
 
