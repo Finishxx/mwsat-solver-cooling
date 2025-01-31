@@ -1,6 +1,7 @@
 #include "SatCooling.h"
 
 #include "Rng.h"
+#include "debug.h"
 
 // SatCooling
 SatConfig SatCooling::getRandomConfiguration() const {
@@ -15,6 +16,25 @@ SatConfig SatCooling::getRandomConfiguration() const {
 }
 
 SatConfig SatCooling::getRandomNeighbor(const SatConfig& configuration) const {
+  /*for (const Clause& clause : instance.clauses()) {
+    bool allSatisfied =
+        std::ranges::all_of(clause.disjuncts(), [&](const Term& term) {
+          bool isSet = configuration.byId(term.id());
+          if ((term.isPlain() and isSet) or (term.isNegated() and not isSet)) {
+            return true;
+          }
+          return false;
+        });
+    if (allSatisfied) {
+      DEBUG_PRINT("All satisfied");
+      const Term& toFlip =
+          clause.disjuncts()[Rng::next() % clause.disjuncts().size()];
+      std::vector<bool> copy = configuration.underlying;
+      copy[toFlip.id() - 1].flip();
+      return SatConfig(std::move(copy));
+    }
+  }*/
+  // Else all satisfied
   std::vector<bool> copy = configuration.underlying;
   copy[Rng::next() % copy.size()].flip();
   return SatConfig(std::move(copy));

@@ -33,8 +33,8 @@ int main(int argc, char** argv) {
   CLI::Option* debugOption = app.add_option(
       "-d,--debug",
       debugPath,
-      "Where to write <stepNum> <currentSatisfied> <currentWeight> "
-      "<maxWeight> on each line per step"
+      "Where to write <stepsTotal> <satisfied> <weight> <bestWeight> on each "
+      "line per step"
   );
 
   uint32_t maxIterations;
@@ -106,8 +106,8 @@ int main(int argc, char** argv) {
     if (debugEnabled) {
       const SatCriteria& current = simulatedCooling.getCurrentCriteria();
       const SatCriteria& best = simulatedCooling.getBestCriteria();
-      debugStream << simulatedCooling.getStepsTotal() << " "
-                  << current.satisfied() << " " << current.weight() << " "
+      debugStream << simulatedCooling.getStepsTotal() << ","
+                  << current.satisfied() << "," << current.weight() << ","
                   << best.weight() << std::endl;
     }
   }

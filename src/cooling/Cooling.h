@@ -216,10 +216,12 @@ class Cooling {
     while (step()) {
     }
   }
-private:
+
+ private:
   void swapCandidate(
       const Configuration& candidate, const Criteria& candidateCriteria
   ) {
+    DEBUG_PRINT("Swapping")
     currentConfig = candidate;
     currentCriteria = candidateCriteria;
     stepsSinceChange = 0;
@@ -233,28 +235,20 @@ private:
   }
   ///@}
 
-public:
+ public:
   /// @name Search state
   /// Return copies of values regarding current search state
   ///@{
-  const Configuration& getCurrentConfiguration() const {
-    return currentConfig;
-  }
-  const Configuration& getBestConfiguration() const {
-    return bestConfig;
-  }
+  const Configuration& getCurrentConfiguration() const { return currentConfig; }
+  const Configuration& getBestConfiguration() const { return bestConfig; }
   Configuration copyCurrentConfiguration() const {
     return Configuration(currentConfig);
   }
   Configuration copyBestConfiguration() const {
     return Configuration(bestConfig);
   }
-  const Criteria& getCurrentCriteria() const {
-    return currentCriteria;
-  }
-  const Criteria& getBestCriteria() const {
-    return bestCriteria;
-  }
+  const Criteria& getCurrentCriteria() const { return currentCriteria; }
+  const Criteria& getBestCriteria() const { return bestCriteria; }
   Criteria copyCurrentCriteria() const { return Criteria(currentCriteria); }
   Criteria copyBestCriteria() const { return Criteria(bestCriteria); }
   ///@}
