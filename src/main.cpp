@@ -9,10 +9,14 @@
 #include "dimacsParsing.h"
 
 int main(int argc, char** argv) {
-  CLI::App app{"App description"};
+  CLI::App app{
+      "Solves maximum weighted sat instances in the MWSAT format using "
+      "simulated cooling method."
+  };
 
   std::filesystem::path inputPath;
-  app.add_option("-f,--file", inputPath, "A help string")->required();
+  app.add_option("-f,--file", inputPath, "Path to instance in the MWSAT format")
+      ->required();
 
   std::string seedStr;
   uint64_t seed;
@@ -37,29 +41,26 @@ int main(int argc, char** argv) {
       "line per step"
   );
 
-  uint32_t maxIterations;
+  uint32_t maxIterations = 0;
   app.add_option(
-         "-i,--maxIterations",
-         maxIterations,
-         "Iterations before end, if 0 then infinite"
-  )
-      ->required();
+      "-i,--maxIterations",
+      maxIterations,
+      "Iterations before end, if 0 then infinite"
+  );
 
-  uint32_t withoutGain;
+  uint32_t withoutGain = 0;
   app.add_option(
-         "-w,--withoutGain",
-         withoutGain,
-         "End after steps without gain, if 0 then infinite"
-  )
-      ->required();
+      "-w,--withoutGain",
+      withoutGain,
+      "End after steps without gain, if 0 then infinite"
+  );
 
-  uint32_t withoutChange;
+  uint32_t withoutChange = 0;
   app.add_option(
-         "-W,--withoutChange",
-         withoutChange,
-         "End after steps without change, if 0 then infinite"
-  )
-      ->required();
+      "-W,--withoutChange",
+      withoutChange,
+      "End after steps without change, if 0 then infinite"
+  );
 
   CLI11_PARSE(app, argc, argv);
 
