@@ -169,6 +169,21 @@ class Cooling {
     }
     return true;
   }
+  [[nodiscard]] std::string endedBecause() const {
+    if (temperature <= schedule.stopTemperature) {
+      return "temperature";
+    }
+    if (schedule.stopAfterTotalSteps <= stepsTotal) {
+      return "max";
+    }
+    if (schedule.stopAfterNoChange <= stepsSinceChange) {
+      return "change";
+    }
+    if (schedule.stopAfterNoBetterment <= stepsSinceBetterment) {
+      return "gain";
+    }
+    return "unknown";
+  }
   [[nodiscard]] bool notFrozen() const { return !isFrozen(); }
   [[nodiscard]] const CoolingSchedule& coolingSchedule() const {
     return schedule;

@@ -11,7 +11,8 @@
 int main(int argc, char** argv) {
   CLI::App app{
       "Solves maximum weighted sat instances in the MWSAT format using "
-      "simulated cooling method."
+      "simulated cooling method.\n\n The result is printed in the format of "
+      "<inputFileName> <weight> <variable1> <variable2> ... <variableN>"
   };
 
   std::filesystem::path inputPath;
@@ -19,7 +20,6 @@ int main(int argc, char** argv) {
       ->required();
 
   std::string seedStr;
-  uint64_t seed;
   app.add_option("-s,--seed", seedStr, "64-bit hex seed")->required();
 
   double startTemperature;
@@ -62,6 +62,17 @@ int main(int argc, char** argv) {
       "End after steps without change, if 0 then infinite"
   );
 
+  bool extendedOutput = false;
+  app.add_flag(
+      "-E, --extendedOutput",
+      extendedOutput,
+      "Show extended output after completion in the format of:"
+      "First line is normal <fileName> <weight> <variable1> ... <variableN> "
+      "Second line is <endedBecause> <isSatisfied> <satisfiedCount> "
+      "<stepsTotal> <stepsSinceChange> <stepsSinceGain>"
+      "Where endedBecause is one of: temperature|max|change|gain|unknown"
+  );
+
   CLI11_PARSE(app, argc, argv);
 
   // Steps correction
@@ -95,14 +106,15 @@ int main(int argc, char** argv) {
       satCooling, schedule
   );
 
+  // Setup debug output
   bool debugEnabled = false;
   std::ofstream debugStream;
-
   if (*debugOption) {
     debugEnabled = true;
     debugStream = std::ofstream(debugPath.c_str());
   }
 
+  // Simulated cooling main loop
   while (simulatedCooling.step()) {
     if (debugEnabled) {
       const SatCriteria& current = simulatedCooling.getCurrentCriteria();
@@ -114,7 +126,6 @@ int main(int argc, char** argv) {
   }
 
   SatCriteria finalCriteria = simulatedCooling.copyBestCriteria();
-
 #ifdef DEBUG_ENABLED
   std::cout << "SatisfiedCount: " << finalCriteria.satisfied() << std::endl;
   std::cout << "Weight: " << finalCriteria.weight() << std::endl;
@@ -126,6 +137,7 @@ int main(int argc, char** argv) {
             << simulatedCooling.getStepsSinceBetterment() << std::endl;
 #endif
 
+  // Standard print
   std::cout << inputPath.filename().string() << " " << finalCriteria.weight()
             << " ";
   SatConfig config = simulatedCooling.copyBestConfiguration();
@@ -136,5 +148,14 @@ int main(int argc, char** argv) {
       std::cout << -i;
     if (i != config.underlying.size()) std::cout << " ";
   }
+
+  if (extendedOutput) {
+    std::cout << simulatedCooling.endedBecause() << " "
+              << finalCriteria.isSatisfied() << " " << finalCriteria.satisfied()
+              << " " << simulatedCooling.getStepsTotal() << " "
+              << simulatedCooling.getStepsSinceChange() << " "
+              << simulatedCooling.getStepsSinceBetterment() << std::endl;
+  }
+
   return 0;
 }
