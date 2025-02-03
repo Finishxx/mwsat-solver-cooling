@@ -3,6 +3,7 @@
 #include <CLI/CLI.hpp>
 #include <filesystem>
 #include <iostream>
+#include <ranges>
 
 #include "Cooling.h"
 #include "Rng.h"
@@ -15,8 +16,10 @@ int main(int argc, char** argv) {
       "<inputFileName> <weight> <variable1> <variable2> ... <variableN>"
   };
 
-  std::filesystem::path inputPath;
-  app.add_option("-f,--file", inputPath, "Path to instance in the MWSAT format")
+  std::string inputFileName;
+  app.add_option(
+         "-f,--file", inputFileName, "Path to instance in the MWSAT format"
+  )
       ->required();
 
   std::string seedStr;
@@ -63,7 +66,7 @@ int main(int argc, char** argv) {
   );
 
   bool extendedOutput = false;
-  app.add_flag(
+  app.add_option(
       "-E, --extendedOutput",
       extendedOutput,
       "Show extended output after completion in the format of:"
@@ -81,6 +84,11 @@ int main(int argc, char** argv) {
   if (withoutGain == 0) withoutGain = UINT32_MAX;
 
   // Check input path
+  auto hello = std::ranges::views::drop_while(inputFileName, [](char c) {
+    return std::isspace(c);
+  });
+  std::string world(hello.begin(), hello.end());
+  std::filesystem::path inputPath(world);
   if (!exists(inputPath)) {
     std::cerr << "Input file " << inputPath << " does not exist" << std::endl;
     return EXIT_FAILURE;
@@ -150,6 +158,7 @@ int main(int argc, char** argv) {
   }
 
   if (extendedOutput) {
+    std::cout << std::endl;
     std::cout << simulatedCooling.endedBecause() << " "
               << finalCriteria.isSatisfied() << " " << finalCriteria.satisfied()
               << " " << simulatedCooling.getStepsTotal() << " "

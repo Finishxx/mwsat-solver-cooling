@@ -1,5 +1,6 @@
 #include "SatCriteria.h"
 
+#include "debug.h"
 #include <iostream>
 
 SatCriteria::SatCriteria(
@@ -42,7 +43,7 @@ double SatCriteria::howMuchWorseThan(const SatCriteria& other) const {
   if (this->isSatisfied() && not other.isSatisfied()) {
     double satisfiedRatio =
         static_cast<double>(other.satisfiedCount) / instance->clauses().size();
-    std::cout << "Satisfied ratio:" << satisfiedRatio << std::endl;
+    DEBUG_PRINT("Satisfied ratio:" << satisfiedRatio)
 
     return (other.weights * satisfiedRatio) - this->weights;
   }
