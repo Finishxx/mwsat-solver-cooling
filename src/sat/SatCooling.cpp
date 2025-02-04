@@ -62,8 +62,6 @@ SatCriteria SatCooling::evaluateConfiguration(
   }
   return SatCriteria(instance, satisfiedClauses, totalWeights);
 }
-//       std::vector<std::vector<int32_t>> clauses,
-// std::vector<int32_t> weights
 
 SatCooling::SatCooling(
     std::vector<std::vector<int32_t>> clauses, std::vector<int32_t> weights

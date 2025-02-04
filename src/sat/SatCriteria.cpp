@@ -5,7 +5,11 @@
 #include "debug.h"
 
 double SatCriteria::satisfiedRatio() const {
-  DEBUG_PRINT("Satisfied ratio:" << satisfiedRatio)
+  DEBUG_PRINT(
+      "Satisfied ratio:"
+      << (static_cast<double>(satisfiedCount) /
+          static_cast<double>(instance->clauses().size()))
+  )
   return static_cast<double>(satisfiedCount) /
       static_cast<double>(instance->clauses().size());
 }
