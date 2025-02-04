@@ -15,8 +15,12 @@ class SatCriteria {
   uint32_t satisfiedCount;
   int32_t weights;
 
+  [[nodiscard]] double satisfiedRatio() const;
+
  public:
-  friend std::ostream& operator<<(std::ostream& os, const SatCriteria& criteria);
+  friend std::ostream& operator<<(
+      std::ostream& os, const SatCriteria& criteria
+  );
 
   SatCriteria() = default;
   SatCriteria(
@@ -31,6 +35,5 @@ class SatCriteria {
   bool operator>=(const SatCriteria& other) const;
   [[nodiscard]] double howMuchWorseThan(const SatCriteria& other) const;
 };
-
 
 #endif  // SATCRITERIA_H

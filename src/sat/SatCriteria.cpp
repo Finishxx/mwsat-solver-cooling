@@ -1,7 +1,13 @@
 #include "SatCriteria.h"
 
-#include "debug.h"
 #include <iostream>
+
+#include "debug.h"
+
+double SatCriteria::satisfiedRatio() const {
+  DEBUG_PRINT("Satisfied ratio:" << satisfiedRatio)
+  return static_cast<double>(satisfiedCount) / instance->clauses().size();
+}
 
 SatCriteria::SatCriteria(
     const WSatInstance& instance, uint32_t satisfiedCount, int32_t weights
@@ -41,22 +47,12 @@ double SatCriteria::howMuchWorseThan(const SatCriteria& other) const {
 
   // We are satisfied, but he is not => penalize him
   if (this->isSatisfied() && not other.isSatisfied()) {
-    double satisfiedRatio =
-        static_cast<double>(other.satisfiedCount) / instance->clauses().size();
-    DEBUG_PRINT("Satisfied ratio:" << satisfiedRatio)
-
-    return (other.weights * satisfiedRatio) - this->weights;
+    return (other.weights * other.satisfiedRatio()) - this->weights;
   }
-  return 1;
 
-  // He is satisfied and we are not => shortcircuit take him
-  // return 1;
   // We are not satisfied, but he is => penalize ourselves
-  // if (not this->isSatisfied() && other.isSatisfied()) {
-  double satisfiedRatio =
-      static_cast<double>(this->satisfiedCount) / instance->clauses().size();
-  std::cout << "Satisfied ratio:" << satisfiedRatio << std::endl;
-  return other.weights - (this->weights * satisfiedRatio);
+  // if (not this->isSatisfied() && other.isSatisfied())
+  return other.weights - (this->weights * this->satisfiedRatio());
 }
 std::ostream& operator<<(std::ostream& os, const SatCriteria& criteria) {
   os << "SatCriteria(satisfiedCount=" << criteria.satisfied()
