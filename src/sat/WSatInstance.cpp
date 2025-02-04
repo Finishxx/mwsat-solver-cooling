@@ -3,6 +3,7 @@
 #include <assert.h>
 
 #include <algorithm>
+#include <numeric>
 #include <ranges>
 
 // ===================== Term =====================
@@ -96,11 +97,16 @@ WSatInstance::WSatInstance(
     // Ids are + 1, because id starts at 1, not 0
     variables_.emplace_back(i + 1, weights.at(i), clauses_);
   }
+
+  // Initialize weight total
+  weightTotal_ =
+      std::accumulate(weights.begin(), weights.end(), 0, std::plus<>());
 }
 bool WSatInstance::isSatisfiable() const {
   return std::ranges::all_of(clauses_, [](const Clause& clause) {
     return clause.isSatisfiable();
   });
 }
+int32_t WSatInstance::weightTotal() const { return weightTotal_; }
 
 // ===================== EndInstance =====================

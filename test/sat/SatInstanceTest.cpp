@@ -74,4 +74,6 @@ w 2 4 1 6 0
   EXPECT_EQ(instance.variables()[1].occurences().size(), 3);
   EXPECT_EQ(instance.variables()[2].occurences().size(), 6);
   EXPECT_EQ(instance.variables()[3].occurences().size(), 4);
+
+  EXPECT_EQ(instance.weightTotal(), 13);
 }

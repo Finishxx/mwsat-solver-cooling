@@ -16,6 +16,7 @@ class SatCriteria {
   int32_t weights;
 
   [[nodiscard]] double satisfiedRatio() const;
+  [[nodiscard]] double normalizedWeight() const;
 
  public:
   friend std::ostream& operator<<(

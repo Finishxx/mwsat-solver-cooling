@@ -6,7 +6,8 @@
 
 double SatCriteria::satisfiedRatio() const {
   DEBUG_PRINT("Satisfied ratio:" << satisfiedRatio)
-  return static_cast<double>(satisfiedCount) / instance->clauses().size();
+  return static_cast<double>(satisfiedCount) /
+      static_cast<double>(instance->clauses().size());
 }
 
 SatCriteria::SatCriteria(
@@ -15,6 +16,10 @@ SatCriteria::SatCriteria(
     : instance(&instance), satisfiedCount(satisfiedCount), weights(weights) {}
 
 int32_t SatCriteria::weight() const { return weights; }
+double SatCriteria::normalizedWeight() const {
+  return static_cast<double>(weights) /
+      static_cast<double>(instance->weightTotal());
+}
 uint32_t SatCriteria::satisfied() const { return satisfiedCount; }
 
 bool SatCriteria::isValid() const { return isSatisfied(); }
@@ -36,23 +41,22 @@ bool SatCriteria::operator>=(const SatCriteria& other) const {
 double SatCriteria::howMuchWorseThan(const SatCriteria& other) const {
   // Both formulas satisfied => compare weights
   if (this->isSatisfied() and other.isSatisfied())
-    return other.weights - this->weights;
+    return other.normalizedWeight() - this->normalizedWeight();
 
   // Neither formulas satisfied => compare satisfied
   if (not this->isSatisfied() && not other.isSatisfied())
-    return (
-        static_cast<int64_t>(other.satisfiedCount) -
-        static_cast<int64_t>(this->satisfiedCount)
-    );
+    return (other.satisfiedRatio() - this->satisfiedRatio());
 
   // We are satisfied, but he is not => penalize him
   if (this->isSatisfied() && not other.isSatisfied()) {
-    return (other.weights * other.satisfiedRatio()) - this->weights;
+    return (other.normalizedWeight() * other.satisfiedRatio()) -
+        this->normalizedWeight();
   }
 
   // We are not satisfied, but he is => penalize ourselves
   // if (not this->isSatisfied() && other.isSatisfied())
-  return other.weights - (this->weights * this->satisfiedRatio());
+  return other.normalizedWeight() -
+      (this->normalizedWeight() * this->satisfiedRatio());
 }
 std::ostream& operator<<(std::ostream& os, const SatCriteria& criteria) {
   os << "SatCriteria(satisfiedCount=" << criteria.satisfied()

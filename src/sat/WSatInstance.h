@@ -63,6 +63,7 @@ class WSatInstance {
   /** Not indexable by variable id */
   std::vector<Variable> variables_;
   std::vector<Clause> clauses_;
+  int32_t weightTotal_;
 
  public:
   [[nodiscard]] const std::vector<Variable>& variables() const;
@@ -72,6 +73,7 @@ class WSatInstance {
   );
   /** Slow, because it calls isSatisfiable() on all clauses */
   [[nodiscard]] bool isSatisfiable() const;
+  [[nodiscard]] int32_t weightTotal() const;
 };
 
 #endif  // MAXWSATINSTANCE_H
