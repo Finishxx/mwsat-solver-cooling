@@ -48,20 +48,21 @@ double SatCriteria::howMuchWorseThan(const SatCriteria& other) const {
     return other.normalizedWeight() - this->normalizedWeight();
 
   // Neither formulas satisfied => compare satisfied
-  if (not this->isSatisfied() && not other.isSatisfied())
-    return (other.satisfiedRatio() - this->satisfiedRatio());
+  if (not this->isSatisfied() and not other.isSatisfied())
+    return other.satisfiedRatio() - this->satisfiedRatio();
 
   // We are satisfied, but he is not => penalize him
-  if (this->isSatisfied() && not other.isSatisfied()) {
-    return (other.normalizedWeight() * other.satisfiedRatio()) -
+  if (this->isSatisfied() and not other.isSatisfied()) {
+    return other.normalizedWeight() * other.satisfiedRatio() -
         this->normalizedWeight();
   }
 
   // We are not satisfied, but he is => penalize ourselves
-  // if (not this->isSatisfied() && other.isSatisfied())
+  // if (not this->isSatisfied() and other.isSatisfied())
   return other.normalizedWeight() -
-      (this->normalizedWeight() * this->satisfiedRatio());
+      this->normalizedWeight() * this->satisfiedRatio();
 }
+
 std::ostream& operator<<(std::ostream& os, const SatCriteria& criteria) {
   os << "SatCriteria(satisfiedCount=" << criteria.satisfied()
      << ", weight=" << criteria.weight()

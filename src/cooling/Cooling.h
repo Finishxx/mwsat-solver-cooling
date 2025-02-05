@@ -217,15 +217,15 @@ class Cooling {
     DEBUG_PRINT("Current: " << currentCriteria)
     DEBUG_PRINT("CandidateWorse" << candidateWorse)
 
-    // Swap current with candidate
+    // If better
     if (candidateWorse <= 0) {
       swapCandidate(candidate, candidateCriteria);
       return true;
     }
+    // else: decide if we want to apply the less good candidate anyway
 
     double acceptChance = std::exp(-(candidateWorse / temperature));
     DEBUG_PRINT("Accept chance: " << acceptChance << "%")
-    // else: decide if we want to apply the less good candidate anyway
     if (Rng::nextDoublePercent() < acceptChance) {
       swapCandidate(candidate, candidateCriteria);
     }
