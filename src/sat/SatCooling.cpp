@@ -1,5 +1,7 @@
 #include "SatCooling.h"
 
+#include <algorithm>
+
 #include "Rng.h"
 #include "debug.h"
 
@@ -16,25 +18,33 @@ SatConfig SatCooling::getRandomConfiguration() const {
 }
 
 SatConfig SatCooling::getRandomNeighbor(const SatConfig& configuration) const {
-  /*for (const Clause& clause : instance.clauses()) {
-    bool allSatisfied =
-        std::ranges::all_of(clause.disjuncts(), [&](const Term& term) {
-          bool isSet = configuration.byId(term.id());
-          if ((term.isPlain() and isSet) or (term.isNegated() and not isSet)) {
-            return true;
-          }
-          return false;
-        });
-    if (allSatisfied) {
-      DEBUG_PRINT("All satisfied");
-      const Term& toFlip =
-          clause.disjuncts()[Rng::next() % clause.disjuncts().size()];
+  if (p > Rng::nextDoublePercent()) {
+    std::vector<Clause const*> unsatisfiedClauses;
+    for (const Clause& clause : instance.clauses()) {
+      bool allSatisfied =
+          std::ranges::all_of(clause.disjuncts(), [&](const Term& term) {
+            bool isSet = configuration.byId(term.id());
+            if ((term.isPlain() and isSet) or
+                (term.isNegated() and not isSet)) {
+              return true;
+            }
+            return false;
+          });
+      if (allSatisfied) continue;
+      unsatisfiedClauses.push_back(&clause);
+    }
+    if (!unsatisfiedClauses.empty()) {
+      Clause const* toFlip =
+          unsatisfiedClauses[Rng::next() % unsatisfiedClauses.size()];
       std::vector<bool> copy = configuration.underlying;
-      copy[toFlip.id() - 1].flip();
+      copy
+          [toFlip->disjuncts()[Rng::next() % toFlip->disjuncts().size()].id() -
+           1]
+              .flip();
       return SatConfig(std::move(copy));
     }
-  }*/
-  // Else all satisfied
+  }
+  // else p < Rng::nextDoublePercent() || unsatisfiedClauses.empty()
   std::vector<bool> copy = configuration.underlying;
   copy[Rng::next() % copy.size()].flip();
   return SatConfig(std::move(copy));

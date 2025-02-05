@@ -10,3 +10,4 @@ enable_testing()
 add_subdirectory(src)
 add_subdirectory(test)
 
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native -flto")

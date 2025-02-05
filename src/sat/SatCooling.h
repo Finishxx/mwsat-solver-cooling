@@ -6,6 +6,7 @@
 class SatCooling {
  private:
   WSatInstance instance;
+  static constexpr double p = 0.4;
 
  public:
   [[nodiscard]] SatConfig getRandomConfiguration() const;
