@@ -64,7 +64,7 @@ Tried to decouple the simulated annealing from the MWSAT problem specifics as mu
       ![unsatisfied](img/unsatisfied.png)
     - **Only one state (`a`) satisfies the formula:**
   
-      ![satisfied->unsatisfied](img/satisfied->unsatisfied.png)
+      ![satisfied-unsatisfied](img/satisfied-unsatisfied.png)
 - **Additional parameters**
   - Equilibrium (number of iterations at a given temperature)
   - Cooling coefficient
