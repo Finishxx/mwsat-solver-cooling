@@ -69,11 +69,11 @@ int main(int argc, char** argv) {
   app.add_option(
       "-E, --extendedOutput",
       extendedOutput,
-      "Show extended output after completion in the format of:"
-      "First line is normal <fileName> <weight> <variable1> ... <variableN> "
-      "Second line is <endedBecause> <isSatisfied> <satisfiedCount> "
-      "<stepsTotal> <stepsSinceChange> <stepsSinceGain>"
-      "Where endedBecause is one of: temperature|max|change|gain|unknown"
+      "Show extended output after completion in the format of: \n"
+      "First line is normal <fileName> <weight> <variable1> ... <variableN>. \n"
+      "Second line is <endedBecause> <isSatisfied> <satisfiedCount> \n"
+      "<stepsTotal> <stepsSinceChange> <stepsSinceGain>, \n"
+      "where endedBecause is one of: temperature|max|change|gain|unknown"
   );
 
   CLI11_PARSE(app, argc, argv);
