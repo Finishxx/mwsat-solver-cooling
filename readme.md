@@ -5,7 +5,7 @@
 > fine-tuning this solver and simulated annealing parameters to solve particular
 > instances in reasonable time.
 
-Uses simulated annealing (cooling) to solve [MWSAT]((https://en.wikipedia.org/wiki/Maximum_satisfiability_problem)).
+Uses simulated annealing (cooling) to solve [MWSAT](https://en.wikipedia.org/wiki/Maximum_satisfiability_problem).
 
 Compile the project using `cmake` and run it with `--help` for this message:
 ```
