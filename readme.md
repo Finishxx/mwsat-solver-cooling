@@ -56,18 +56,15 @@ Tried to decouple the simulated annealing from the MWSAT problem specifics as mu
       This approach helps avoid getting stuck in local maxima that do not satisfy the formula.
 - **The `howMuchWorse(a, b)` Function**  
   This function quantifies how much worse state `a` is compared to state `b`, with normalization for comparability:
-    - **Both states satisfy the formula:**  
-      $
-      \frac{a.\text{weight}}{\text{weightTotal}} - \frac{b.\text{weight}}{\text{weightTotal}}
-      $
-    - **Neither state satisfies the formula:**  
-      $
-      \frac{a.\text{satisfiedClauses}}{\text{clausesTotal}} - \frac{b.\text{satisfiedClauses}}{\text{clausesTotal}}
-      $
-    - **Only one state (`a`) satisfies the formula:**  
-      $
-      \frac{a.\text{weight}}{\text{weightTotal}} - \frac{b.\text{weight}}{\text{weightTotal}} \cdot \frac{b.\text{satisfiedClauses}}{\text{maxClauses}}
-      $
+    - **Both states satisfy the formula:**
+  
+      ![satisfied](img/satisfied.png)
+    - **Neither state satisfies the formula:**
+  
+      ![unsatisfied](img/unsatisfied.png)
+    - **Only one state (`a`) satisfies the formula:**
+  
+      ![satisfied->unsatisfied](img/satisfied->unsatisfied.png)
 - **Additional parameters**
   - Equilibrium (number of iterations at a given temperature)
   - Cooling coefficient
